@@ -1,47 +1,37 @@
-# InterestMatch — UI Mocks
+# Buildathon App
 
-A social interest-matching app. Users pick one of 5 categories, fill in a short bio (all questions skippable), and an AI matches them into a small group chat that opens with an AI-generated icebreaker referencing everyone's answers.
-
-**Core flow:** Select category → Bio questionnaire → AI matching → Group chat
+AI-powered social matching app. Users fill in interest profiles, AI matches them into groups of 4–6, and sends the first message.
 
 ---
 
-## How to view
+## Repo Structure
 
-No build step needed. Every file is a self-contained HTML file — just open it in a browser.
-
-**Open all v2 screens at once (PowerShell):**
-```powershell
-$base = "UI\mocks\"
-@("v2-01-splash.html","v2-02-signin.html","v2-03-categories.html","v2-05-matching.html") |
-  ForEach-Object { Start-Process ($base + $_); Start-Sleep -Milliseconds 200 }
 ```
-
-**Open all original screens:**
-```powershell
-$base = "UI\mocks\"
-@("01-splash.html","02-signup.html","03-select-interest.html",
-  "04-q-films.html","04-q-music.html","04-q-sports.html",
-  "04-q-gaming.html","04-q-nationalities.html","05-matching.html","06-group-chat.html") |
-  ForEach-Object { Start-Process ($base + $_); Start-Sleep -Milliseconds 200 }
+UI/           ← HTML prototype mocks — design team owns this
+app/          ← Expo (React Native) frontend — UI team owns this
+functions/    ← Azure Functions backend — backend team owns this
+shared/       ← TypeScript types shared by both sides — coordinate before changing
+supabase/     ← Database migrations — run these once to set up the schema
 ```
 
 ---
 
-## Screens
+## UI Mocks (`UI/mocks/`)
 
-### V2 Redesign (`UI/mocks/v2-*.html`)
-New visual direction inspired by a card-grid aesthetic — dark theme, colorful per-category cards, bold typography, consistent header across all screens.
+Self-contained HTML prototypes. No build step — open any file directly in a browser.
 
-| File | Screen | Description |
-|------|--------|-------------|
-| `v2-01-splash.html` | Discovery feed | Category cards in a grid — large featured card + 2×2 grid. FAB + Interests/Matches tab nav at bottom. |
-| `v2-02-signin.html` | Sign In | Wavy violet decoration, bold title, dark pill inputs, solid violet CTA, social login row (Google, Instagram, X, TikTok). |
-| `v2-03-categories.html` | Pick your vibe | Tap a category card to select it (white ring indicator). "Find my people" + nav bar at bottom. |
-| `v2-05-matching.html` | Finding your people | Animated radar with per-category accent rings, avatars pop in at staggered delays, progress checklist, CTA fades in at 3.6s. |
+**User flow:** Select category → Bio questionnaire (all questions skippable) → AI matching → Group chat with AI icebreaker
 
-### Original Mocks (`UI/mocks/`)
-Full 10-screen flow, fully wired navigation.
+### V2 Redesign — card-grid aesthetic, dark theme, per-category accent colors
+
+| File | Screen |
+|------|--------|
+| `v2-01-splash.html` | Discovery feed — large featured card + 2×2 category grid, FAB + tab nav |
+| `v2-02-signin.html` | Sign In — wavy violet decoration, pill inputs, violet CTA, social login row |
+| `v2-03-categories.html` | Pick your vibe — tap to select, white ring indicator, "Find my people" + nav bar |
+| `v2-05-matching.html` | Finding your people — animated radar, avatars pop in, progress steps, group CTA |
+
+### Original 10-screen flow
 
 | File | Screen |
 |------|--------|
@@ -56,74 +46,121 @@ Full 10-screen flow, fully wired navigation.
 | `05-matching.html` | Animated matching / loading screen |
 | `06-group-chat.html` | Group chat with AI icebreaker |
 
----
+### Design system
 
-## Design system
+**Theme:** Dark, mobile-first (`max-width: 430px`)  
+**Fonts:** `Righteous` (headings) + `Plus Jakarta Sans` (body) via Google Fonts CDN
 
-**Theme:** Dark, mobile-first (`max-width: 430px`, `min-height: 100dvh`)
-
-**Fonts (Google Fonts CDN):**
-- `Righteous` — display headings, category names, card titles
-- `Plus Jakarta Sans` — body, labels, buttons (v2 screens)
-- `Poppins` — body text (original screens)
-
-**CSS variables (every file):**
 ```css
 :root {
   --bg:      oklch(9% 0.010 268);   /* near-black */
-  --surface: oklch(13% 0.010 268);  /* card background */
+  --surface: oklch(13% 0.010 268);
   --border:  oklch(20% 0.008 268);
-  --text:    oklch(96% 0.005 268);  /* near-white */
+  --text:    oklch(96% 0.005 268);
   --muted:   oklch(55% 0.005 268);
-  --accent:  <per-category value>;
+  --accent:  <per-category>;        /* Films: 14° · Music: 95° · Sports: 142° · Gaming: 252° · Nationalities: 302° */
 }
 ```
 
-**Per-category accent colors:**
+---
 
-| Category | OKLCH | Swatch |
-|----------|-------|--------|
-| Films | `oklch(57% 0.22 14)` | Crimson red |
-| Music | `oklch(78% 0.17 95)` | Electric yellow |
-| Sports | `oklch(66% 0.20 142)` | Lime green |
-| Gaming | `oklch(62% 0.22 252)` | Electric blue |
-| Nationalities | `oklch(62% 0.21 302)` | Warm violet |
+## For the UI Team (app/)
 
-**Tinted surfaces:** `color-mix(in oklch, var(--accent) 14%, transparent)`
+### Setup
+
+```bash
+cd app
+cp .env.example .env
+# Fill in .env with the Supabase anon key (get from Manuel)
+npm install
+npm run web        # develop in browser
+npm run ios        # iOS simulator
+```
+
+### What's already wired
+
+| File | What it does |
+|------|-------------|
+| `src/lib/supabase.ts` | Supabase client — import this for all DB/auth/realtime calls |
+| `src/lib/api.ts` | Azure Functions client — use `api.matchUsers()` and `api.searchGroups()` |
+| `src/lib/database.types.ts` | Full TypeScript types for every DB table |
+| `shared/types.ts` | Shared types for API request/response shapes |
+
+### Key rules
+
+- **Direct to Supabase**: reading/writing messages, fetching profiles, auth, realtime subscriptions
+- **Via `api.ts`**: requesting a match (`api.matchUsers`) and searching groups (`api.searchGroups`)
+- Use `EXPO_PUBLIC_` prefix for any env vars the frontend needs
+- Install packages with `npx expo install <package>` not plain `npm install`
+
+### Screens to build (Phase 1)
+
+1. **Login screen** — Google OAuth via Supabase Auth
+2. **Username setup** — shown once after first login
+3. **Film profile form** — top 3 films, favourite actor, favourite director, film they dislike
+4. **Groups list** — user's active groups
+5. **Chat screen** — real-time messages via Supabase Realtime
+6. **Group discovery** — 3 pending group options to browse and accept
 
 ---
 
-## Constraints
+## For the Backend Team (functions/)
 
-1. All files are self-contained HTML — no frameworks, no build step
-2. Always use the correct per-category `--accent` OKLCH value
-3. Skip buttons disable their input via JS `.skipped` class (toggles to "Unskip")
-4. Chips toggle with `aria-pressed` + `.selected` class
-5. Mobile-first: `max-width: 430px`, `min-height: 100dvh`
-6. `touch-action: manipulation` on all interactive elements
-7. `prefers-reduced-motion` respected on all animated screens
+### Setup
+
+```bash
+cd functions
+npm install
+# Edit local.settings.json — add SUPABASE_SERVICE_ROLE_KEY and ANTHROPIC_API_KEY
+npm run dev        # builds TypeScript and starts Azure Functions locally on port 7071
+```
+
+Requires: [Azure Functions Core Tools v4](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local)
+
+```bash
+npm install -g azure-functions-core-tools@4 --unsafe-perm true
+```
+
+### Functions
+
+| Endpoint | Trigger | What it does |
+|----------|---------|-------------|
+| `POST /api/match-users` | Frontend call | Creates a match request for the user |
+| `POST /api/create-group` | Internal (cron) | Creates a group + AI opener message for a set of user IDs |
+| `POST /api/search-groups` | Frontend call | Returns 3 group options from a natural language prompt |
+
+### Daily matching cron (to add)
+
+The `create-group` function is internal — it needs a daily timer trigger that:
+1. Fetches all pending match requests
+2. Finds compatible users via pgvector cosine similarity
+3. Calls `create-group` for each matched set of 4–6 users
 
 ---
 
-## Project structure
+## Database Setup (one-time)
 
+Run the migration against your Supabase project:
+
+```bash
+# Install Supabase CLI
+npm install -g supabase
+
+# Apply migration
+supabase db push --db-url "postgresql://postgres:[DB_PASSWORD]@db.uijpgioeqgoitfqwakqj.supabase.co:5432/postgres"
 ```
-buildathon/
-├── UI/
-│   └── mocks/
-│       ├── 01-splash.html
-│       ├── 02-signup.html
-│       ├── 03-select-interest.html
-│       ├── 04-q-films.html
-│       ├── 04-q-music.html
-│       ├── 04-q-sports.html
-│       ├── 04-q-gaming.html
-│       ├── 04-q-nationalities.html
-│       ├── 05-matching.html
-│       ├── 06-group-chat.html
-│       ├── v2-01-splash.html
-│       ├── v2-02-signin.html
-│       ├── v2-03-categories.html
-│       └── v2-05-matching.html
-└── InterestMatch-Handoff.html
-```
+
+Or paste `supabase/migrations/0001_initial_schema.sql` directly into the Supabase SQL editor.
+
+---
+
+## Environment Variables
+
+| Variable | Used by | Where to get it |
+|----------|---------|-----------------|
+| `EXPO_PUBLIC_SUPABASE_URL` | app | supabase.com > Settings > API |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | app | supabase.com > Settings > API |
+| `EXPO_PUBLIC_API_BASE_URL` | app | Azure Functions URL after deploy |
+| `SUPABASE_URL` | functions | supabase.com > Settings > API |
+| `SUPABASE_SERVICE_ROLE_KEY` | functions | supabase.com > Settings > API (secret) |
+| `ANTHROPIC_API_KEY` | functions | console.anthropic.com |
