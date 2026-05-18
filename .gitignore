@@ -1,0 +1,6 @@
+node_modules/
+.env
+.env.local
+functions/local.settings.json
+functions/dist/
+app/.expo/
