@@ -49,7 +49,12 @@ Extract search intent as JSON with keys:
     });
 
     const interpretText = interpretResponse.content[0].type === 'text' ? interpretResponse.content[0].text : '{}';
-    const filters = JSON.parse(interpretText);
+    let filters: Record<string, unknown>;
+    try {
+      filters = JSON.parse(interpretText);
+    } catch {
+      filters = { vibe: 'any', preferred_films: [], category: 'any' };
+    }
 
     // Find pending match requests (excluding the user's own) that haven't been matched yet
     // and share at least one interest category with the user
@@ -89,7 +94,12 @@ Output JSON array of objects: [{ user_ids: string[], shared_interests: string[],
     });
 
     const selectionText = selectionResponse.content[0].type === 'text' ? selectionResponse.content[0].text : '[]';
-    const selections: Array<{ user_ids: string[]; shared_interests: string[]; reason: string }> = JSON.parse(selectionText);
+    let selections: Array<{ user_ids: string[]; shared_interests: string[]; reason: string }>;
+    try {
+      selections = JSON.parse(selectionText);
+    } catch {
+      selections = [];
+    }
 
     // Build GroupOption previews (not yet creating groups — user picks first)
     const options: GroupOption[] = await Promise.all(

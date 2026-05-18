@@ -49,7 +49,12 @@ Output ONLY valid JSON with keys: group_name, summary, opener_message.`,
     });
 
     const text = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : '{}';
-    const { group_name, summary, opener_message } = JSON.parse(text);
+    let group_name: string, summary: string, opener_message: string;
+    try {
+      ({ group_name, summary, opener_message } = JSON.parse(text));
+    } catch {
+      throw new Error(`Claude returned invalid JSON: ${text.slice(0, 200)}`);
+    }
 
     // Create the group
     const { data: group, error: groupErr } = await supabase
