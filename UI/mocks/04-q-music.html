@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterestMatch — Music Bio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Righteous&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:      oklch(10% 0.012 268);
+    --surface: oklch(14% 0.012 268);
+    --border:  oklch(22% 0.008 268);
+    --text:    oklch(95% 0.005 268);
+    --muted:   oklch(60% 0.005 268);
+    --accent:  oklch(78% 0.17 95);   /* electric yellow — music */
+  }
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: 'Poppins', sans-serif; -webkit-font-smoothing: antialiased; }
+  .screen { min-height: 100dvh; max-width: 430px; margin: 0 auto; padding: 0 24px 40px; display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 4px; }
+  .back-btn {
+    width: 40px; height: 40px; border-radius: 10px; background: var(--surface); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: var(--text); transition: background 150ms; touch-action: manipulation;
+  }
+  .back-btn:hover { background: oklch(18% 0.012 268); }
+  .back-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .back-btn svg { width: 20px; height: 20px; }
+  .step-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .progress-wrap { padding: 16px 0 0; }
+  .progress-track { height: 4px; border-radius: 99px; background: oklch(20% 0.008 268); }
+  .progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 300ms ease-out; }
+  .cat-badge {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 10px;
+    border-radius: 99px; background: color-mix(in oklch, var(--accent) 14%, transparent);
+    border: 1px solid color-mix(in oklch, var(--accent) 35%, transparent);
+    color: var(--accent); font-size: 13px; font-weight: 600; margin-top: 24px; width: fit-content;
+  }
+  .cat-badge svg { width: 16px; height: 16px; }
+  .header { padding: 14px 0 28px; }
+  .header h1 { font-family: 'Righteous', sans-serif; font-size: 26px; line-height: 1.25; color: var(--text); }
+  .header p { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .questions { display: flex; flex-direction: column; gap: 24px; flex: 1; }
+  .question-card { display: flex; flex-direction: column; gap: 10px; }
+  .question-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .q-number { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); min-width: 28px; padding-top: 1px; }
+  .q-text { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.45; flex: 1; }
+  .skip-btn {
+    font-size: 12px; font-weight: 500; color: var(--muted); background: none; border: none; cursor: pointer;
+    padding: 2px 0; white-space: nowrap; touch-action: manipulation; transition: color 150ms;
+  }
+  .skip-btn:hover { color: var(--text); }
+  .skip-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .q-input {
+    width: 100%; min-height: 52px; border-radius: 12px; background: var(--surface); border: 1.5px solid var(--border);
+    color: var(--text); font-family: 'Poppins', sans-serif; font-size: 15px; padding: 14px 16px;
+    resize: none; transition: border-color 150ms; outline: none; line-height: 1.5;
+  }
+  .q-input:focus { border-color: var(--accent); }
+  .q-input::placeholder { color: var(--muted); }
+  .q-input.filled { border-color: color-mix(in oklch, var(--accent) 50%, transparent); }
+  /* Secret genre card */
+  .secret-card {
+    background: var(--surface); border-radius: 14px; border: 1.5px solid var(--border); padding: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .secret-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .secret-genres { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 7px 14px; border-radius: 99px; font-size: 13px; font-weight: 500;
+    background: oklch(18% 0.008 268); border: 1.5px solid var(--border); color: var(--muted);
+    cursor: pointer; transition: border-color 150ms, color 150ms, background 150ms; touch-action: manipulation;
+  }
+  .chip:hover, .chip.selected {
+    border-color: var(--accent); color: color-mix(in oklch, var(--accent) 80%, oklch(10% 0.012 268));
+    background: color-mix(in oklch, var(--accent) 12%, transparent);
+  }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .cta-area { padding-top: 32px; display: flex; flex-direction: column; gap: 12px; }
+  .btn-primary {
+    width: 100%; height: 56px; border-radius: 14px; background: var(--accent); border: none;
+    color: oklch(12% 0.012 268); font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: transform 120ms ease-out, opacity 120ms ease-out; touch-action: manipulation;
+  }
+  .btn-primary:active { transform: scale(0.97); opacity: 0.88; }
+  .btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .hint { font-size: 12px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<main class="screen" role="main">
+  <div class="topbar">
+    <a href="03-select-interest.html" aria-label="Back to categories">
+      <button class="back-btn" tabindex="-1" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </a>
+    <span class="step-label">Step 1 of 2</span>
+  </div>
+
+  <div class="progress-wrap" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion 50%">
+    <div class="progress-track"><div class="progress-fill" style="width: 50%"></div></div>
+  </div>
+
+  <div class="cat-badge" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    Music
+  </div>
+
+  <div class="header">
+    <h1>Your music bio</h1>
+    <p>Be honest — especially about the guilty pleasures.</p>
+  </div>
+
+  <div class="questions">
+
+    <div class="question-card">
+      <div class="question-top">
+        <span class="q-number">01</span>
+        <span class="q-text">What's your favourite song right now?</span>
+        <button class="skip-btn" aria-label="Skip question 1">Skip</button>
+      </div>
+      <textarea class="q-input filled" rows="2" placeholder="Song — Artist" aria-label="Your favourite song right now">BIRDS OF A FEATHER — Billie Eilish</textarea>
+    </div>
+
+    <div class="question-card">
+      <div class="question-top">
+        <span class="q-number">02</span>
+        <span class="q-text">Your favourite 3 artists?</span>
+        <button class="skip-btn" aria-label="Skip question 2">Skip</button>
+      </div>
+      <textarea class="q-input" rows="2" placeholder="e.g. Frank Ocean, Tyler the Creator, Lorde…" aria-label="Your favourite 3 artists"></textarea>
+    </div>
+
+    <div class="question-card">
+      <div class="question-top">
+        <span class="q-number">03</span>
+        <span class="q-text">A genre you secretly love that people wouldn't guess from you?</span>
+        <button class="skip-btn" aria-label="Skip question 3">Skip</button>
+      </div>
+      <div class="secret-card">
+        <p class="secret-label">Pick one (or type your own below)</p>
+        <div class="secret-genres" role="group" aria-label="Secret genre options">
+          <button class="chip" aria-pressed="false">Country</button>
+          <button class="chip selected" aria-pressed="true">Musical Theatre</button>
+          <button class="chip" aria-pressed="false">Classical</button>
+          <button class="chip" aria-pressed="false">Metal</button>
+          <button class="chip" aria-pressed="false">K-Pop</button>
+          <button class="chip" aria-pressed="false">Reggaeton</button>
+          <button class="chip" aria-pressed="false">Drum &amp; Bass</button>
+          <button class="chip" aria-pressed="false">Folk</button>
+        </div>
+        <textarea class="q-input" rows="1" style="margin-top:8px" placeholder="Or describe it…" aria-label="Other secret genre"></textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="cta-area">
+    <a href="05-matching.html" style="text-decoration:none; display:block;">
+      <button class="btn-primary">Find my music people</button>
+    </a>
+    <p class="hint">Your answers are only shared with your matched group</p>
+  </div>
+</main>
+<script>
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const pressed = chip.getAttribute('aria-pressed') === 'true';
+      chip.setAttribute('aria-pressed', String(!pressed));
+      chip.classList.toggle('selected', !pressed);
+    });
+  });
+</script>
+</body>
+</html>

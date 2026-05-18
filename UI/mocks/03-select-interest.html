@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterestMatch — Pick Your Vibe</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; background: #080808; color: #fff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .screen { min-height: 100dvh; max-width: 430px; margin: 0 auto; display: flex; flex-direction: column; padding-bottom: 40px; }
+
+  /* ── Top bar ── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 52px 18px 0; }
+  .back-btn {
+    width: 46px; height: 46px; border-radius: 14px;
+    background: #161616; border: 1px solid #252525;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: background 120ms; text-decoration: none;
+  }
+  .back-btn:hover { background: #202020; }
+  .back-btn svg { width: 20px; height: 20px; color: #ccc; }
+  .step-tag {
+    font-size: 12px; font-weight: 700; color: #444;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  /* ── Header ── */
+  .header { padding: 28px 18px 20px; }
+  .header h1 { font-size: 36px; font-weight: 900; color: #fff; line-height: 1.05; letter-spacing: -0.03em; }
+  .header p { font-size: 14px; font-weight: 500; color: #444; margin-top: 8px; line-height: 1.5; }
+
+  /* ── Grid ── */
+  .grid { padding: 0 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+  /* ── Cards ── */
+  .card {
+    border-radius: 26px; overflow: hidden; position: relative;
+    cursor: pointer; text-decoration: none; display: block;
+    transition: transform 130ms ease-out;
+  }
+  .card:active { transform: scale(0.96); }
+  .card-span { grid-column: 1 / -1; }
+
+  .card-inner {
+    min-height: 178px; padding: 20px 20px 18px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; z-index: 2;
+  }
+  .card-span .card-inner { min-height: 158px; flex-direction: row; align-items: center; gap: 20px; }
+
+  /* Grid texture */
+  .card::before {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.052) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.052) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* Category backgrounds */
+  .bg-gaming  { background: #2e4496; }
+  .bg-films   { background: #8c2a2a; }
+  .bg-music   { background: #7a2a7a; }
+  .bg-sports  { background: #1a6e44; }
+  .bg-nations { background: #8c4e14; }
+
+  /* ── Card content ── */
+  .card-top { display: flex; flex-direction: column; gap: 0; }
+  .cat-icon {
+    width: 42px; height: 42px; border-radius: 13px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 0;
+  }
+  .cat-icon svg { width: 20px; height: 20px; color: rgba(255,255,255,0.9); }
+
+  .card-bottom { display: flex; flex-direction: column; gap: 3px; }
+  .card-name { font-size: 22px; font-weight: 900; color: #fff; line-height: 1.0; letter-spacing: -0.03em; }
+  .card-tagline { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.5); line-height: 1.4; }
+
+  /* Arrow */
+  .card-arrow {
+    position: absolute; bottom: 16px; right: 16px; z-index: 3;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(0,0,0,0.35); backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-arrow svg { width: 14px; height: 14px; color: #fff; }
+
+  /* Active count badge */
+  .card-count {
+    position: absolute; top: 14px; right: 14px; z-index: 3;
+    background: rgba(0,0,0,0.38); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 99px; padding: 4px 10px;
+    font-size: 10.5px; font-weight: 700; color: rgba(255,255,255,0.7);
+  }
+
+  /* Wide card content layout */
+  .card-span .card-inner .card-left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+  .card-span .card-inner .card-right { flex-shrink: 0; }
+  .card-span .cat-icon { width: 64px; height: 64px; border-radius: 18px; }
+  .card-span .cat-icon svg { width: 30px; height: 30px; }
+  .card-span .card-name { font-size: 28px; }
+  .card-span .card-tagline { font-size: 13px; max-width: 200px; }
+</style>
+</head>
+<body>
+<main class="screen" role="main">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <a href="01-splash.html" class="back-btn" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <span class="step-tag">Step 1 of 2</span>
+  </header>
+
+  <!-- Heading -->
+  <div class="header">
+    <h1>Pick your<br><em>vibe.</em></h1>
+    <p>Choose one category and we'll find your people.</p>
+  </div>
+
+  <!-- Category grid -->
+  <div class="grid" role="list">
+
+    <!-- Gaming (large) -->
+    <a href="04-q-gaming.html" class="card card-span bg-gaming" role="listitem" aria-label="Gaming — Find your FPS squad">
+      <div class="card-count">847 active</div>
+      <div class="card-inner">
+        <div class="card-left">
+          <div class="card-bottom" style="margin-top:auto;">
+            <div class="card-name">Gaming</div>
+            <div class="card-tagline">No rank check.<br>Just good games.</div>
+          </div>
+        </div>
+        <div class="card-right">
+          <div class="cat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </div>
+    </a>
+
+    <!-- Films -->
+    <a href="04-q-films.html" class="card bg-films" role="listitem" aria-label="Films — Great taste, no spoilers">
+      <div class="card-inner">
+        <div class="card-top">
+          <div class="cat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          </div>
+        </div>
+        <div class="card-bottom">
+          <div class="card-name">Films</div>
+          <div class="card-tagline">Great taste,<br>no spoilers.</div>
+        </div>
+      </div>
+      <div class="card-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </div>
+    </a>
+
+    <!-- Music -->
+    <a href="04-q-music.html" class="card bg-music" role="listitem" aria-label="Music — Your secret genre is safe here">
+      <div class="card-inner">
+        <div class="card-top">
+          <div class="cat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+        </div>
+        <div class="card-bottom">
+          <div class="card-name">Music</div>
+          <div class="card-tagline">Secret genre<br>stays secret.</div>
+        </div>
+      </div>
+      <div class="card-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </div>
+    </a>
+
+    <!-- Sports -->
+    <a href="04-q-sports.html" class="card bg-sports" role="listitem" aria-label="Sports — Find your 5-a-side squad">
+      <div class="card-inner">
+        <div class="card-top">
+          <div class="cat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8l2.5 3.5L12 15l-2.5-3.5L12 8z"/></svg>
+          </div>
+        </div>
+        <div class="card-bottom">
+          <div class="card-name">Sports</div>
+          <div class="card-tagline">Find your<br>5-a-side squad.</div>
+        </div>
+      </div>
+      <div class="card-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </div>
+    </a>
+
+    <!-- Nationalities (wide) -->
+    <a href="04-q-nationalities.html" class="card card-span bg-nations" role="listitem" aria-label="Nationalities — Connect with people from home">
+      <div class="card-count">1.2k active</div>
+      <div class="card-inner">
+        <div class="card-left">
+          <div class="card-bottom" style="margin-top:auto;">
+            <div class="card-name">Nationalities</div>
+            <div class="card-tagline">Connect with people from home<br>or curious about where you're from.</div>
+          </div>
+        </div>
+        <div class="card-right">
+          <div class="cat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </div>
+    </a>
+
+  </div>
+
+</main>
+</body>
+</html>

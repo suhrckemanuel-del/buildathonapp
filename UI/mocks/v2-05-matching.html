@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>InterestMatch — Finding Your People</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      oklch(9% 0.010 268);
+  --surface: oklch(13% 0.010 268);
+  --border:  oklch(20% 0.008 268);
+  --text:    oklch(96% 0.005 268);
+  --muted:   oklch(55% 0.005 268);
+  --accent:  oklch(62% 0.21 302);
+  --cat:     oklch(62% 0.22 252); /* gaming blue */
+}
+
+html, body { height: 100%; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 52px 20px 16px;
+  position: sticky; top: 0; z-index: 20;
+  background: var(--bg);
+}
+.logo-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--text); border: none;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation; cursor: pointer; flex-shrink: 0;
+}
+.header-right { display: flex; align-items: center; gap: 10px; }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: none; background: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); cursor: pointer; touch-action: manipulation;
+  position: relative;
+}
+.badge {
+  position: absolute; top: 4px; right: 3px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  background: var(--accent); border-radius: 100px;
+  font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Content ── */
+.content {
+  flex: 1;
+  padding: 8px 20px 40px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 24px;
+}
+
+/* ── Category badge ── */
+.cat-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: oklch(18% 0.16 252);
+  border: 1.5px solid oklch(36% 0.22 252 / 0.5);
+  border-radius: 100px;
+  padding: 7px 16px;
+  font-size: 13px; font-weight: 700;
+  color: var(--text);
+  align-self: flex-start;
+}
+
+/* ── Radar card ── */
+.radar-card {
+  width: 100%;
+  background: var(--surface);
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  padding: 36px 0;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background glow */
+.radar-card::before {
+  content: '';
+  position: absolute;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(62% 0.22 252 / 0.08) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.radar-scene {
+  position: relative;
+  width: 220px; height: 220px;
+}
+
+/* Rings */
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid oklch(62% 0.22 252 / 0.35);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse-ring 2.8s ease-out infinite;
+}
+.ring-1 { width: 80px;  height: 80px;  animation-delay: 0s; }
+.ring-2 { width: 140px; height: 140px; animation-delay: 0.7s; }
+.ring-3 { width: 190px; height: 190px; animation-delay: 1.4s; }
+.ring-4 { width: 230px; height: 230px; animation-delay: 2.1s; }
+
+@keyframes pulse-ring {
+  0%   { opacity: 0.7; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
+}
+
+/* Center dot */
+.center-dot {
+  position: absolute;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--cat);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center;
+  animation: dot-breathe 2.2s ease-in-out infinite;
+  z-index: 5;
+  box-shadow: 0 0 0 0 oklch(62% 0.22 252 / 0.5);
+}
+@keyframes dot-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(62% 0.22 252 / 0.4); }
+  50%       { box-shadow: 0 0 0 14px oklch(62% 0.22 252 / 0); }
+}
+
+/* Avatars */
+.avatar {
+  position: absolute;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 3px solid var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: white;
+  z-index: 6;
+  opacity: 0;
+  transform: scale(0.4);
+  animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.av-j {
+  background: linear-gradient(135deg, oklch(55% 0.18 0), oklch(45% 0.15 0));
+  top: -14px; left: 50%; transform: translateX(-50%) scale(0.4);
+  animation-name: pop-in-top;
+  animation-delay: 1.8s;
+}
+.av-s {
+  background: linear-gradient(135deg, oklch(55% 0.15 60), oklch(45% 0.12 60));
+  top: 50%; right: -14px; transform: translateY(-50%) scale(0.4);
+  animation-name: pop-in-right;
+  animation-delay: 2.3s;
+}
+.av-k {
+  background: linear-gradient(135deg, oklch(50% 0.18 142), oklch(40% 0.15 142));
+  bottom: -14px; left: 20px;
+  animation-delay: 2.8s;
+}
+
+@keyframes pop-in {
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes pop-in-top {
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+@keyframes pop-in-right {
+  to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+/* ── Steps ── */
+.steps-card {
+  width: 100%;
+  background: var(--surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.step {
+  display: flex; align-items: center; gap: 14px;
+}
+
+.step-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-icon.done {
+  background: var(--cat);
+}
+.step-icon.active {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+}
+
+.step-label {
+  font-size: 14px; font-weight: 600; color: var(--text);
+}
+.step.pending .step-label { color: var(--muted); }
+
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid oklch(96% 0.005 268 / 0.2);
+  border-top-color: var(--text);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── CTA ── */
+.cta-card {
+  width: 100%;
+  border-radius: 24px;
+  background: linear-gradient(145deg, oklch(22% 0.17 302) 0%, oklch(38% 0.22 302) 100%);
+  padding: 24px 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  position: relative; overflow: hidden;
+  opacity: 0;
+  animation: fade-up 0.5s ease-out 3.6s forwards;
+}
+.cta-card::after {
+  content: '';
+  position: absolute;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: oklch(62% 0.21 302 / 0.18);
+  right: -40px; top: -40px;
+  pointer-events: none;
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cta-headline {
+  font-size: 15px; font-weight: 500;
+  color: oklch(96% 0.005 268 / 0.75);
+}
+.cta-headline strong {
+  font-weight: 800;
+  color: oklch(96% 0.005 268);
+}
+
+.btn-join {
+  width: 100%; padding: 16px 0;
+  border-radius: 100px; border: none;
+  background: oklch(96% 0.005 268);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px; font-weight: 800;
+  color: oklch(12% 0.01 268);
+  cursor: pointer; touch-action: manipulation;
+  transition: opacity 0.15s ease-out;
+  letter-spacing: 0.01em;
+}
+.btn-join:active { opacity: 0.85; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ring, .center-dot, .avatar, .av-j, .av-s, .av-k, .spinner, .cta-card {
+    animation: none !important;
+  }
+  .avatar, .av-j, .av-s, .av-k { opacity: 1; transform: scale(1) !important; }
+  .av-j { transform: translateX(-50%) scale(1) !important; }
+  .av-s { transform: translateY(-50%) scale(1) !important; }
+  .cta-card { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <button class="logo-btn" aria-label="Menu">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="3" fill="#0a0a12"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#0a0a12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="header-right">
+    <button class="icon-btn" aria-label="Search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Notifications, 9 unread">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+      </svg>
+      <span class="badge">9</span>
+    </button>
+  </div>
+</header>
+
+<main class="content">
+
+  <span class="cat-badge">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(62% 0.22 252)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h.01M12 12h.01M18 12h.01M9 10v4M15 10v4"/></svg>
+    Gaming
+  </span>
+
+  <!-- Radar -->
+  <div class="radar-card" role="status" aria-label="Searching for your group">
+    <div class="radar-scene" aria-hidden="true">
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-3"></div>
+      <div class="ring ring-4"></div>
+
+      <div class="center-dot">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h.01M12 12h.01M18 12h.01M9 10v4M15 10v4"/></svg>
+      </div>
+
+      <div class="avatar av-j">J</div>
+      <div class="avatar av-s">S</div>
+      <div class="avatar av-k">K</div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps-card" aria-label="Matching progress">
+    <div class="step done">
+      <div class="step-icon done" aria-label="Complete">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <span class="step-label">Bio submitted</span>
+    </div>
+    <div class="step done">
+      <div class="step-icon done" aria-label="Complete">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <span class="step-label">Analysing your taste</span>
+    </div>
+    <div class="step pending">
+      <div class="step-icon active" aria-label="In progress">
+        <div class="spinner" aria-hidden="true"></div>
+      </div>
+      <span class="step-label">Matching you with a group</span>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-card">
+    <p class="cta-headline">
+      <strong>3 gamers</strong> matched with your vibe
+    </p>
+    <button class="btn-join" onclick="location.href='06-group-chat.html'">
+      Join your group chat
+    </button>
+  </div>
+
+</main>
+
+</body>
+</html>

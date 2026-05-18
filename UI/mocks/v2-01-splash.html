@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>InterestMatch — Discover</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      oklch(9% 0.010 268);
+  --surface: oklch(13% 0.010 268);
+  --border:  oklch(20% 0.008 268);
+  --text:    oklch(96% 0.005 268);
+  --muted:   oklch(55% 0.005 268);
+}
+
+html, body {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 52px 20px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+}
+
+.logo-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--text);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation; cursor: pointer;
+  flex-shrink: 0;
+}
+
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.icon-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: none; background: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); cursor: pointer;
+  touch-action: manipulation;
+  position: relative;
+}
+
+.badge {
+  position: absolute; top: 4px; right: 3px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  background: oklch(62% 0.21 302);
+  border-radius: 100px;
+  font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Feed ── */
+.feed {
+  flex: 1;
+  padding: 8px 16px 112px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Card base ── */
+.card {
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  display: block;
+  text-decoration: none;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.card-inner {
+  position: absolute; inset: 0;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+
+.card-emoji {
+  font-size: 44px; line-height: 1;
+  filter: drop-shadow(0 4px 12px oklch(0% 0 0 / 0.45));
+  pointer-events: none;
+}
+
+.card-bottom {}
+
+.card-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: oklch(95% 0.005 268 / 0.6);
+  margin-bottom: 3px;
+}
+
+.card-title {
+  font-family: 'Righteous', cursive;
+  font-size: 26px;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: oklch(96% 0.005 268 / 0.8);
+}
+
+.avatar-stack { display: flex; }
+.av {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid oklch(9% 0.01 268 / 0.6);
+  margin-right: -7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; color: white;
+}
+
+/* featured card blob decoration */
+.card::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* ── Featured ── */
+.card-featured {
+  height: 210px;
+  background: linear-gradient(145deg, oklch(24% 0.17 302) 0%, oklch(42% 0.22 302) 100%);
+}
+.card-featured::after {
+  width: 180px; height: 180px;
+  background: oklch(62% 0.21 302 / 0.22);
+  right: -40px; top: -40px;
+}
+.card-featured .card-title { font-size: 30px; }
+
+/* ── 2-col grid ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.card-sm { height: 168px; }
+.card-sm .card-emoji { font-size: 34px; }
+.card-sm .card-title { font-size: 19px; }
+
+/* per-category card backgrounds */
+.card-gaming {
+  background: linear-gradient(145deg, oklch(18% 0.16 252) 0%, oklch(36% 0.22 252) 100%);
+}
+.card-gaming::after {
+  width: 130px; height: 130px;
+  background: oklch(62% 0.22 252 / 0.2);
+  right: -25px; bottom: -25px;
+}
+
+.card-music {
+  background: linear-gradient(145deg, oklch(24% 0.12 95) 0%, oklch(44% 0.17 95) 100%);
+}
+.card-music::after {
+  width: 120px; height: 120px;
+  background: oklch(78% 0.17 95 / 0.18);
+  right: -20px; bottom: -20px;
+}
+
+.card-films {
+  background: linear-gradient(145deg, oklch(18% 0.14 14) 0%, oklch(36% 0.22 14) 100%);
+}
+.card-films::after {
+  width: 130px; height: 130px;
+  background: oklch(57% 0.22 14 / 0.2);
+  right: -25px; bottom: -25px;
+}
+
+.card-sports {
+  background: linear-gradient(145deg, oklch(18% 0.13 142) 0%, oklch(36% 0.20 142) 100%);
+}
+.card-sports::after {
+  width: 120px; height: 120px;
+  background: oklch(66% 0.20 142 / 0.2);
+  right: -20px; bottom: -20px;
+}
+
+/* ── Quick action btn on card ── */
+.card-action {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none; cursor: pointer;
+  background: oklch(96% 0.005 268 / 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation;
+  pointer-events: all;
+  flex-shrink: 0;
+}
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  position: fixed; bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  padding: 10px 18px 32px;
+  background: linear-gradient(to top, var(--bg) 65%, transparent);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 20;
+}
+
+.fab {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--text);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  box-shadow: 0 4px 16px oklch(96% 0.005 268 / 0.2);
+}
+
+.nav-pill-wrap {
+  flex: 1;
+  background: var(--surface);
+  border-radius: 100px;
+  padding: 5px;
+  display: flex;
+  gap: 4px;
+}
+
+.nav-pill {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 100px;
+  border: none; background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--muted);
+  cursor: pointer; touch-action: manipulation;
+  transition: color 0.15s ease-out;
+}
+.nav-pill.active {
+  background: oklch(62% 0.21 302);
+  color: oklch(96% 0.005 268);
+}
+
+.nav-profile-stack { display: flex; flex-shrink: 0; }
+.nav-av {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 2.5px solid var(--bg);
+  margin-right: -10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <button class="logo-btn" aria-label="Menu">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="3" fill="#0a0a12"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#0a0a12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="header-right">
+    <button class="icon-btn" aria-label="Search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Notifications, 9 unread">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+      </svg>
+      <span class="badge" aria-label="9 new">9</span>
+    </button>
+  </div>
+</header>
+
+<main class="feed">
+
+  <!-- Featured: Nationalities -->
+  <a href="04-q-nationalities.html" class="card card-featured">
+    <div class="card-inner">
+      <div class="card-top">
+        <span class="card-emoji">🌍</span>
+        <button class="card-action" aria-label="Save interest" onclick="event.preventDefault()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+        </button>
+      </div>
+      <div class="card-bottom">
+        <div class="card-eyebrow">Trending this week</div>
+        <div class="card-title">Nationalities</div>
+        <div class="card-meta">
+          <div class="avatar-stack" aria-hidden="true">
+            <div class="av" style="background: oklch(50% 0.15 200);">F</div>
+            <div class="av" style="background: oklch(50% 0.15 30);">S</div>
+            <div class="av" style="background: oklch(50% 0.15 280);">K</div>
+          </div>
+          <span>12.3K members</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 2-col: Gaming + Music -->
+  <div class="card-grid">
+    <a href="04-q-gaming.html" class="card card-sm card-gaming">
+      <div class="card-inner">
+        <div class="card-top">
+          <span class="card-emoji">🎮</span>
+          <button class="card-action" style="width:30px;height:30px;" aria-label="Quick join" onclick="event.preventDefault()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </button>
+        </div>
+        <div class="card-bottom">
+          <div class="card-title">Gaming</div>
+          <div class="card-meta">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            9.8K
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="04-q-music.html" class="card card-sm card-music">
+      <div class="card-inner">
+        <div class="card-top">
+          <span class="card-emoji">🎵</span>
+          <button class="card-action" style="width:30px;height:30px;" aria-label="Quick join" onclick="event.preventDefault()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </button>
+        </div>
+        <div class="card-bottom">
+          <div class="card-title">Music</div>
+          <div class="card-meta">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            7.4K
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- 2-col: Films + Sports -->
+  <div class="card-grid">
+    <a href="04-q-films.html" class="card card-sm card-films">
+      <div class="card-inner">
+        <div class="card-top">
+          <span class="card-emoji">🎬</span>
+          <button class="card-action" style="width:30px;height:30px;" aria-label="Quick join" onclick="event.preventDefault()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </button>
+        </div>
+        <div class="card-bottom">
+          <div class="card-title">Films</div>
+          <div class="card-meta">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            10.3K
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="04-q-sports.html" class="card card-sm card-sports">
+      <div class="card-inner">
+        <div class="card-top">
+          <span class="card-emoji">⚽</span>
+          <button class="card-action" style="width:30px;height:30px;" aria-label="Quick join" onclick="event.preventDefault()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </button>
+        </div>
+        <div class="card-bottom">
+          <div class="card-title">Sports</div>
+          <div class="card-meta">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            5.9K
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+</main>
+
+<nav class="bottom-nav" aria-label="Main navigation">
+  <button class="fab" aria-label="Create post">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(9% 0.01 268)" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <div class="nav-pill-wrap" role="tablist">
+    <button class="nav-pill active" role="tab" aria-selected="true">Interests</button>
+    <button class="nav-pill" role="tab" aria-selected="false" onclick="location.href='05-matching.html'">Matches</button>
+  </div>
+  <div class="nav-profile-stack" aria-hidden="true">
+    <div class="nav-av" style="background: linear-gradient(135deg, oklch(45% 0.18 200), oklch(38% 0.14 200));">😊</div>
+    <div class="nav-av" style="background: linear-gradient(135deg, oklch(45% 0.18 30), oklch(38% 0.14 30));">😎</div>
+  </div>
+</nav>
+
+</body>
+</html>

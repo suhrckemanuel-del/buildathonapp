@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterestMatch — Discover</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #080808; color: #fff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+  .screen { min-height: 100dvh; max-width: 430px; margin: 0 auto; display: flex; flex-direction: column; padding-bottom: 108px; }
+
+  /* ── Top bar ── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 52px 18px 16px; }
+  .logo-mark {
+    width: 46px; height: 46px; border-radius: 14px;
+    background: #161616; border: 1px solid #252525;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-mark svg { width: 22px; height: 22px; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 46px; height: 46px; border-radius: 14px;
+    background: #161616; border: 1px solid #252525;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: background 120ms;
+  }
+  .icon-btn:hover { background: #202020; }
+  .icon-btn svg { width: 20px; height: 20px; color: #ccc; }
+  .notif-wrap { position: relative; }
+  .badge {
+    position: absolute; top: -5px; right: -5px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #9333ea; border: 2.5px solid #080808;
+    font-size: 9px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; z-index: 1;
+  }
+
+  /* ── Grid ── */
+  .grid { padding: 4px 14px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+  /* ── Cards ── */
+  .card {
+    border-radius: 26px; overflow: hidden; position: relative;
+    cursor: pointer; transition: transform 130ms ease-out;
+    text-decoration: none; display: block;
+  }
+  .card:active { transform: scale(0.96); }
+  .card-span { grid-column: 1 / -1; }
+  .card-span .card-inner { min-height: 196px; }
+  .card-inner { min-height: 186px; padding: 18px 18px 16px; display: flex; flex-direction: column; justify-content: flex-end; position: relative; z-index: 2; }
+
+  /* grid-line texture */
+  .card::before {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.055) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .bg-gaming    { background: #2e4496; }
+  .bg-films     { background: #8c2a2a; }
+  .bg-music     { background: #7a2a7a; }
+  .bg-sports    { background: #1a6e44; }
+  .bg-nations   { background: #8c4e14; }
+
+  /* top-left badge */
+  .cat-badge {
+    position: absolute; top: 15px; left: 15px; z-index: 3;
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(0,0,0,0.38); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 4px 10px 4px 8px; border-radius: 99px;
+    font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.88);
+  }
+  .cat-badge svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+  /* activity dot */
+  .dot-live {
+    position: absolute; top: 16px; right: 16px; z-index: 3;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #22c55e; box-shadow: 0 0 7px #22c55e80;
+  }
+
+  /* number badge on card */
+  .card-pill {
+    position: absolute; bottom: 62px; right: 15px; z-index: 3;
+    background: #9333ea; border-radius: 99px;
+    min-width: 20px; height: 20px; padding: 0 6px;
+    font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* avatars */
+  .avatars { display: flex; margin-bottom: 10px; }
+  .av {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    border: 2.5px solid rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; margin-right: -9px;
+  }
+  .av:last-child { margin-right: 0; }
+  .av-blue  { background: #4a7de8; z-index: 4; }
+  .av-red   { background: #e84a4a; z-index: 3; }
+  .av-green { background: #4ae880; color: #0a2010; z-index: 2; }
+  .av-dim   { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); font-size: 10px; z-index: 1; margin-left: 9px; }
+
+  .card-name { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.1; letter-spacing: -0.025em; margin-bottom: 4px; }
+  .card-span .card-name { font-size: 24px; }
+  .card-stat { font-size: 11.5px; font-weight: 500; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 5px; }
+  .card-stat svg { width: 11px; height: 11px; }
+
+  /* action button */
+  .card-action {
+    position: absolute; bottom: 15px; right: 15px; z-index: 3;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(0,0,0,0.38); backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 120ms;
+  }
+  .card-action:hover { background: rgba(0,0,0,0.6); }
+  .card-action svg { width: 15px; height: 15px; color: #fff; }
+
+  /* ── Bottom nav ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    padding: 12px 20px 34px;
+    background: linear-gradient(to top, #080808 55%, transparent);
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 100;
+  }
+  .fab {
+    width: 54px; height: 54px; border-radius: 50%;
+    background: #fff; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    transition: transform 130ms, box-shadow 130ms;
+  }
+  .fab:active { transform: scale(0.92); }
+  .fab svg { width: 22px; height: 22px; color: #080808; }
+  .nav-tabs {
+    display: flex; gap: 3px;
+    background: #161616; border: 1px solid #252525;
+    border-radius: 99px; padding: 5px;
+  }
+  .nav-tab {
+    padding: 8px 18px; border-radius: 99px;
+    font-size: 13px; font-weight: 700; letter-spacing: -0.01em;
+    color: #555; background: none; border: none; cursor: pointer;
+    transition: background 120ms, color 120ms; white-space: nowrap;
+  }
+  .nav-tab.active { background: #fff; color: #080808; }
+  .nav-profile {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: #9333ea;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 800; cursor: pointer;
+    flex-shrink: 0; text-decoration: none; color: #fff;
+  }
+</style>
+</head>
+<body>
+<main class="screen" role="main">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="logo-mark" aria-label="InterestMatch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+        <path d="M8 12h.01M12 12h.01M16 12h.01"/>
+      </svg>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <div class="notif-wrap">
+        <button class="icon-btn" aria-label="9 notifications">
+          <span class="badge" aria-hidden="true">9</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Bento grid -->
+  <div class="grid" role="list">
+
+    <!-- FPS Crew — Gaming (large) -->
+    <a href="04-q-gaming.html" class="card card-span bg-gaming" role="listitem" aria-label="Join FPS Crew #42 — Gaming">
+      <div class="cat-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>
+        Gaming
+      </div>
+      <div class="dot-live" aria-label="Active now"></div>
+      <div class="card-inner">
+        <div class="avatars" aria-hidden="true">
+          <div class="av av-blue">M</div>
+          <div class="av av-red">J</div>
+          <div class="av av-green">S</div>
+          <div class="av av-dim">+2</div>
+        </div>
+        <div class="card-name">FPS Crew #42</div>
+        <div class="card-stat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          5 members · active now
+        </div>
+      </div>
+      <button class="card-action" aria-label="Join group" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </button>
+    </a>
+
+    <!-- Arthouse Addicts — Films -->
+    <a href="04-q-films.html" class="card bg-films" role="listitem" aria-label="Join Arthouse Addicts — Films">
+      <div class="cat-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+        Films
+      </div>
+      <div class="card-inner">
+        <div class="avatars" aria-hidden="true">
+          <div class="av av-red">A</div>
+          <div class="av av-blue">K</div>
+        </div>
+        <div class="card-name">Arthouse Addicts</div>
+        <div class="card-stat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          4 members
+        </div>
+      </div>
+      <button class="card-action" aria-label="Join group" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </button>
+    </a>
+
+    <!-- Afrobeats HQ — Music -->
+    <a href="04-q-music.html" class="card bg-music" role="listitem" aria-label="Join Afrobeats HQ — Music">
+      <div class="cat-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Music
+      </div>
+      <div class="card-pill" aria-label="3 new messages">3</div>
+      <div class="card-inner">
+        <div class="avatars" aria-hidden="true">
+          <div class="av av-green">T</div>
+          <div class="av av-blue">R</div>
+          <div class="av av-red">N</div>
+        </div>
+        <div class="card-name">Afrobeats HQ</div>
+        <div class="card-stat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          6 members
+        </div>
+      </div>
+      <button class="card-action" aria-label="Join group" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </button>
+    </a>
+
+    <!-- 5-a-Side FC — Sports -->
+    <a href="04-q-sports.html" class="card bg-sports" role="listitem" aria-label="Join 5-a-Side FC — Sports">
+      <div class="cat-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8l3 4-3 4-3-4 3-4z"/></svg>
+        Sports
+      </div>
+      <div class="card-inner">
+        <div class="avatars" aria-hidden="true">
+          <div class="av av-blue">D</div>
+          <div class="av av-green">O</div>
+        </div>
+        <div class="card-name">5-a-Side FC</div>
+        <div class="card-stat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          8 members
+        </div>
+      </div>
+      <button class="card-action" aria-label="Join group" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </button>
+    </a>
+
+    <!-- Lagos Connect — Nationalities -->
+    <a href="04-q-nationalities.html" class="card bg-nations" role="listitem" aria-label="Join Lagos Connect — Nationalities">
+      <div class="cat-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Nationalities
+      </div>
+      <div class="card-pill" aria-label="2 new messages">2</div>
+      <div class="card-inner">
+        <div class="avatars" aria-hidden="true">
+          <div class="av av-red">L</div>
+          <div class="av av-blue">F</div>
+          <div class="av av-green">B</div>
+        </div>
+        <div class="card-name">Lagos Connect</div>
+        <div class="card-stat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          7 members
+        </div>
+      </div>
+      <button class="card-action" aria-label="Join group" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><line x1="3" y1="12" x2="18" y2="12"/></svg>
+      </button>
+    </a>
+
+  </div>
+</main>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav" aria-label="Main navigation">
+  <button class="fab" aria-label="New match">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+  <div class="nav-tabs" role="tablist">
+    <button class="nav-tab active" role="tab" aria-selected="true">Discover</button>
+    <button class="nav-tab" role="tab" aria-selected="false">My Groups</button>
+  </div>
+  <a href="02-signup.html" class="nav-profile" aria-label="Profile">A</a>
+</nav>
+</body>
+</html>
