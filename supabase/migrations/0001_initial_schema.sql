@@ -66,16 +66,6 @@ create table public.groups (
 
 alter table public.groups enable row level security;
 
-create policy "Group members can read their groups"
-  on public.groups for select
-  using (
-    exists (
-      select 1 from public.group_members
-      where group_members.group_id = groups.id
-        and group_members.user_id = auth.uid()
-    )
-  );
-
 -- ── Group Members ─────────────────────────────────────────────
 create table public.group_members (
   group_id    uuid not null references public.groups(id) on delete cascade,
@@ -85,6 +75,17 @@ create table public.group_members (
 );
 
 alter table public.group_members enable row level security;
+
+-- groups RLS defined here (after group_members exists)
+create policy "Group members can read their groups"
+  on public.groups for select
+  using (
+    exists (
+      select 1 from public.group_members
+      where group_members.group_id = groups.id
+        and group_members.user_id = auth.uid()
+    )
+  );
 
 create policy "Users can see members of their groups"
   on public.group_members for select
