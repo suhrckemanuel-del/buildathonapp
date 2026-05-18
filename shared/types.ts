@@ -66,6 +66,24 @@ export interface GroupOption {
   member_count: number;
   shared_interests: string[];            // e.g. ["Kubrick", "The Godfather"]
   preview_members: Pick<User, 'id' | 'username' | 'avatar_url'>[];
+  pending_user_ids?: UserId[];           // users to create the group with when accepted
+}
+
+export interface MatchSignal {
+  label: string;
+  detail: string;
+  strength: 'low' | 'medium' | 'high';
+}
+
+export interface MatchExplanation {
+  group_id: GroupId;
+  group_name: string;
+  summary: string;
+  matched_members: Pick<User, 'id' | 'username' | 'avatar_url'>[];
+  signals: MatchSignal[];
+  ai_reasoning: string;
+  opener_message: string;
+  created_at: string;
 }
 
 // ── Messages ─────────────────────────────────────────────────
@@ -95,6 +113,7 @@ export interface MatchUsersResponse {
 export interface CreateGroupRequest {
   user_ids: UserId[];
   category: InterestCategory;
+  match_request_id?: string | null;
 }
 export interface CreateGroupResponse {
   group_id: GroupId;

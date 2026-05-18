@@ -101,6 +101,10 @@ create policy "Service role can manage group members"
   on public.group_members for all
   using (auth.role() = 'service_role');
 
+create policy "Users can leave their groups"
+  on public.group_members for delete
+  using (auth.uid() = user_id);
+
 -- ── Messages ──────────────────────────────────────────────────
 create table public.messages (
   id            uuid primary key default gen_random_uuid(),
@@ -138,6 +142,27 @@ create policy "Service role can insert AI messages"
   on public.messages for insert
   with check (auth.role() = 'service_role');
 
+-- Safety actions
+create table public.safety_events (
+  id             uuid primary key default gen_random_uuid(),
+  actor_user_id  uuid not null references public.users(id) on delete cascade,
+  group_id       uuid references public.groups(id) on delete set null,
+  target_user_id uuid references public.users(id) on delete set null,
+  action         text not null check (action in ('leave', 'report', 'mute', 'block')),
+  note           text,
+  created_at     timestamptz default now() not null
+);
+
+alter table public.safety_events enable row level security;
+
+create policy "Users can create own safety events"
+  on public.safety_events for insert
+  with check (auth.uid() = actor_user_id);
+
+create policy "Users can read own safety events"
+  on public.safety_events for select
+  using (auth.uid() = actor_user_id);
+
 -- ── Realtime ──────────────────────────────────────────────────
 -- Enable realtime on messages so clients get live updates
 alter publication supabase_realtime add table public.messages;
@@ -147,3 +172,4 @@ alter publication supabase_realtime add table public.group_members;
 create index on public.messages (group_id, created_at);
 create index on public.interest_profiles using ivfflat (embedding vector_cosine_ops);
 create index on public.match_requests (status, expires_at);
+create index on public.safety_events (actor_user_id, created_at);

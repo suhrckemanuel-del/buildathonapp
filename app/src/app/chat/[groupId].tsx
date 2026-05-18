@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -10,7 +11,17 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { MessageBubble } from '@/components/MessageBubble';
+import {
+  DEMO_USER_ID,
+  appendDemoMessage,
+  getDemoGroups,
+  getDemoMessages,
+  isDemoSession,
+  leaveDemoGroup,
+  recordDemoSafetyAction,
+} from '@/lib/demoAuth';
 import { supabase } from '@/lib/supabase';
 import type { Message } from '../../../../shared/types';
 
@@ -28,7 +39,6 @@ export default function ChatScreen() {
 
   const flatListRef = useRef<FlatList<MessageWithSender>>(null);
 
-  // Fetch sender username for a single message
   const fetchUsername = useCallback(async (userId: string): Promise<string | null> => {
     const { data } = await supabase
       .from('users')
@@ -38,7 +48,6 @@ export default function ChatScreen() {
     return data?.username ?? null;
   }, []);
 
-  // Enrich a raw message row with sender username
   const enrichMessage = useCallback(
     async (msg: Message): Promise<MessageWithSender> => {
       if (!msg.sender_id || msg.is_ai_opener) return msg;
@@ -52,13 +61,24 @@ export default function ChatScreen() {
     if (!groupId) return;
 
     let subscribed = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function bootstrap() {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      if (await isDemoSession()) {
+        if (!subscribed) return;
+        const groups = await getDemoGroups();
+        setCurrentUserId(DEMO_USER_ID);
+        setGroupName(groups.find((group) => group.id === groupId)?.name ?? 'Demo chat');
+        setMessages(getDemoMessages(groupId));
+        setLoading(false);
+        return;
+      }
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (subscribed) setCurrentUserId(user?.id ?? null);
 
-      // Fetch group name
       const { data: group } = await supabase
         .from('groups')
         .select('name')
@@ -66,7 +86,6 @@ export default function ChatScreen() {
         .maybeSingle();
       if (subscribed && group) setGroupName(group.name);
 
-      // Load last 50 messages
       const { data: rows } = await supabase
         .from('messages')
         .select('*')
@@ -81,39 +100,35 @@ export default function ChatScreen() {
         setMessages(enriched);
         setLoading(false);
       }
+
+      channel = supabase
+        .channel(`chat:${groupId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `group_id=eq.${groupId}`,
+          },
+          async (payload) => {
+            if (!subscribed) return;
+            const newMsg = payload.new as Message;
+            const next = await enrichMessage(newMsg);
+            if (subscribed) setMessages((prev) => [...prev, next]);
+          },
+        )
+        .subscribe();
     }
 
     bootstrap();
 
-    // Realtime subscription for new messages
-    const channel = supabase
-      .channel(`chat:${groupId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `group_id=eq.${groupId}`,
-        },
-        async (payload) => {
-          if (!subscribed) return;
-          const newMsg = payload.new as Message;
-          const enriched = await enrichMessage(newMsg);
-          if (subscribed) {
-            setMessages((prev) => [...prev, enriched]);
-          }
-        },
-      )
-      .subscribe();
-
     return () => {
       subscribed = false;
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [groupId, enrichMessage]);
 
-  // Auto-scroll on new message
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 80);
@@ -127,43 +142,79 @@ export default function ChatScreen() {
     setSending(true);
     setInputText('');
 
+    if (await isDemoSession()) {
+      const message = await appendDemoMessage(groupId, content);
+      setMessages((prev) => [...prev, { ...message, sender_username: 'demo_films' }]);
+      setSending(false);
+      return;
+    }
+
     const { error } = await supabase.from('messages').insert({
       group_id: groupId,
       sender_id: currentUserId,
       content,
     });
 
-    if (error) {
-      // Restore input on failure
-      setInputText(content);
-    }
+    if (error) setInputText(content);
     setSending(false);
   }
 
-  function renderItem({ item }: { item: MessageWithSender }) {
-    const isOwn = item.sender_id === currentUserId;
-    const isAI = item.is_ai_opener;
+  async function handleLeaveGroup() {
+    if (!groupId || !currentUserId) return;
 
-    if (isAI) {
-      return (
-        <View style={styles.aiContainer}>
-          <Text style={styles.aiLabel}>✦ Icebreaker</Text>
-          <Text style={styles.aiText}>{item.content}</Text>
-        </View>
-      );
+    if (await isDemoSession()) {
+      await leaveDemoGroup(groupId);
+      router.replace('/(tabs)' as never);
+      return;
     }
 
+    const { error } = await supabase
+      .from('group_members')
+      .delete()
+      .eq('group_id', groupId)
+      .eq('user_id', currentUserId);
+
+    if (error) {
+      Alert.alert('Could not leave group', error.message);
+      return;
+    }
+
+    router.replace('/(tabs)' as never);
+  }
+
+  async function handleSafetyAction(action: 'report' | 'mute' | 'block') {
+    if (!groupId || !currentUserId) return;
+
+    if (await isDemoSession()) {
+      await recordDemoSafetyAction(groupId, action, 'Demo safety action');
+      Alert.alert('Saved for demo', `${labelForAction(action)} is recorded as a placeholder.`);
+      return;
+    }
+
+    const { error } = await supabase.from('safety_events').insert({
+      actor_user_id: currentUserId,
+      group_id: groupId,
+      action,
+      note: action === 'report' ? 'User submitted an in-app report.' : 'Placeholder safety preference.',
+    });
+
+    if (error) {
+      Alert.alert('Could not save action', error.message);
+      return;
+    }
+
+    Alert.alert('Saved', `${labelForAction(action)} has been recorded.`);
+  }
+
+  function renderItem({ item }: { item: MessageWithSender }) {
     return (
-      <View style={[styles.row, isOwn ? styles.rowRight : styles.rowLeft]}>
-        <View style={[styles.bubble, isOwn ? styles.bubbleOwn : styles.bubbleOther]}>
-          {!isOwn && item.sender_username ? (
-            <Text style={styles.senderName}>{item.sender_username}</Text>
-          ) : null}
-          <Text style={[styles.messageText, isOwn ? styles.messageTextOwn : styles.messageTextOther]}>
-            {item.content}
-          </Text>
-        </View>
-      </View>
+      <MessageBubble
+        content={item.content}
+        isMine={item.sender_id === currentUserId}
+        senderName={item.sender_username}
+        isAiOpener={item.is_ai_opener}
+        timestamp={formatTime(item.created_at)}
+      />
     );
   }
 
@@ -190,10 +241,44 @@ export default function ChatScreen() {
           />
         )}
 
+        <View style={styles.safetyRow}>
+          <Pressable
+            style={styles.safetyButton}
+            onPress={() => router.push(`/match/${groupId}` as never)}
+            accessibilityRole="button"
+          >
+            <Text style={styles.safetyText}>Why</Text>
+          </Pressable>
+          <Pressable style={styles.safetyButton} onPress={handleLeaveGroup} accessibilityRole="button">
+            <Text style={styles.safetyText}>Leave</Text>
+          </Pressable>
+          <Pressable
+            style={styles.safetyButton}
+            onPress={() => handleSafetyAction('report')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.safetyText}>Report</Text>
+          </Pressable>
+          <Pressable
+            style={styles.safetyButton}
+            onPress={() => handleSafetyAction('mute')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.safetyText}>Mute</Text>
+          </Pressable>
+          <Pressable
+            style={styles.safetyButton}
+            onPress={() => handleSafetyAction('block')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.safetyText}>Block</Text>
+          </Pressable>
+        </View>
+
         <View style={styles.inputRow}>
           <TextInput
             style={styles.input}
-            placeholder="Message…"
+            placeholder="Message..."
             placeholderTextColor="#6b7280"
             value={inputText}
             onChangeText={setInputText}
@@ -206,6 +291,7 @@ export default function ChatScreen() {
           <Pressable
             onPress={sendMessage}
             disabled={!inputText.trim() || sending}
+            accessibilityRole="button"
             style={({ pressed }) => [
               styles.sendButton,
               (!inputText.trim() || sending) && styles.sendButtonDisabled,
@@ -225,47 +311,43 @@ export default function ChatScreen() {
   );
 }
 
+function formatTime(value: string) {
+  return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function labelForAction(action: 'report' | 'mute' | 'block') {
+  if (action === 'report') return 'Report';
+  if (action === 'mute') return 'Mute';
+  return 'Block';
+}
+
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: '#0f0f0f' },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   listContent: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-
-  // AI opener
-  aiContainer: {
-    alignSelf: 'center',
-    maxWidth: '88%',
-    backgroundColor: '#1e1440',
-    borderRadius: 16,
+  safetyRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#111111',
+    borderTopWidth: 1,
+    borderTopColor: '#1f2937',
+  },
+  safetyButton: {
+    flex: 1,
+    minHeight: 34,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#7c3aed',
-    padding: 14,
-    marginVertical: 8,
-    gap: 6,
+    borderColor: '#2a2a2a',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  aiLabel: {
-    fontSize: 11,
+  safetyText: {
+    color: '#d1d5db',
+    fontSize: 12,
     fontWeight: '700',
-    color: '#a78bfa',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
   },
-  aiText: { fontSize: 15, color: '#e5e7eb', lineHeight: 22 },
-
-  // Message rows
-  row: { flexDirection: 'row' },
-  rowLeft: { justifyContent: 'flex-start' },
-  rowRight: { justifyContent: 'flex-end' },
-
-  bubble: { maxWidth: '78%', borderRadius: 18, paddingHorizontal: 14, paddingVertical: 10, gap: 3 },
-  bubbleOwn: { backgroundColor: '#7c3aed', borderBottomRightRadius: 4 },
-  bubbleOther: { backgroundColor: '#1f2937', borderBottomLeftRadius: 4 },
-
-  senderName: { fontSize: 12, fontWeight: '600', color: '#9ca3af', marginBottom: 2 },
-  messageText: { fontSize: 15, lineHeight: 21 },
-  messageTextOwn: { color: '#ffffff' },
-  messageTextOther: { color: '#e5e7eb' },
-
-  // Input bar
   inputRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',

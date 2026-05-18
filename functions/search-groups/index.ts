@@ -121,8 +121,8 @@ Output JSON array of objects: [{ user_ids: string[], shared_interests: string[],
           member_count: allUserIds.length,
           shared_interests: sel.shared_interests,
           preview_members: (members ?? []).slice(0, 3),
-          _pending_user_ids: allUserIds,   // frontend passes this back when user confirms
-        } as GroupOption & { _pending_user_ids: string[] };
+          pending_user_ids: allUserIds,   // frontend passes this back when user confirms
+        };
       })
     );
 

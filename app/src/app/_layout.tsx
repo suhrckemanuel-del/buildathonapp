@@ -8,6 +8,16 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="discover" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="chat/[groupId]"
+          options={{
+            headerStyle: { backgroundColor: '#0f0f0f' },
+            headerTintColor: '#ffffff',
+            headerTitleStyle: { color: '#ffffff' },
+            headerBackTitle: 'Back',
+          }}
+        />
         <Stack.Screen name="onboarding/username" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding/film-profile" options={{ headerShown: false }} />
         <Stack.Screen name="auth/callback" options={{ headerShown: false }} />

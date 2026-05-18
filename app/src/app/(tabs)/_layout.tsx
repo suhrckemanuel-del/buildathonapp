@@ -1,4 +1,6 @@
 import { Tabs } from 'expo-router';
+import { Text } from 'react-native';
+import { colors } from '@/components/theme';
 
 export default function TabsLayout() {
   return (
@@ -6,15 +8,18 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#1a1a1a',
-          borderTopColor: '#333333',
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
+          height: 68,
+          paddingTop: 8,
+          paddingBottom: 10,
         },
-        tabBarActiveTintColor: '#6366f1',
-        tabBarInactiveTintColor: '#9ca3af',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '600',
+          fontWeight: '700',
         },
       }}
     >
@@ -23,10 +28,7 @@ export default function TabsLayout() {
         options={{
           title: 'Groups',
           tabBarLabel: 'Groups',
-          tabBarIcon: ({ color }) => (
-            // house emoji as a simple icon
-            <TabIcon label="🏠" color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabIcon label="G" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -34,20 +36,21 @@ export default function TabsLayout() {
         options={{
           title: 'Discover',
           tabBarLabel: 'Discover',
-          tabBarIcon: ({ color }) => (
-            <TabIcon label="🧭" color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabIcon label="D" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ color }) => <TabIcon label="P" color={color} />,
         }}
       />
     </Tabs>
   );
 }
 
-// Lightweight emoji icon wrapper — avoids needing an icon library
-import { Text } from 'react-native';
-
-function TabIcon({ label, color: _color }: { label: string; color: string }) {
-  return (
-    <Text style={{ fontSize: 20, lineHeight: 24 }}>{label}</Text>
-  );
+function TabIcon({ label, color }: { label: string; color: string }) {
+  return <Text style={{ color, fontSize: 16, lineHeight: 20, fontWeight: '900' }}>{label}</Text>;
 }

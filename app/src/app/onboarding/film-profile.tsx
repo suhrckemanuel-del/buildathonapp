@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -8,12 +7,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { router } from 'expo-router';
+import { FormTextInput } from '@/components/FormTextInput';
+import { PrimaryButton } from '@/components/PrimaryButton';
+import { colors } from '@/components/theme';
+import { isDemoSession, saveDemoFilmProfile } from '@/lib/demoAuth';
 import { supabase } from '@/lib/supabase';
-import type { FilmProfile } from '../../../../../shared/types';
+import type { Json } from '@/lib/database.types';
+import type { FilmProfile } from '../../../../shared/types';
 
 export default function FilmProfileScreen() {
   const [films, setFilms] = useState<[string, string, string]>(['', '', '']);
@@ -46,6 +49,19 @@ export default function FilmProfileScreen() {
 
     setSaving(true);
     try {
+      const profile: FilmProfile = {
+        top_films: [films[0].trim(), films[1].trim(), films[2].trim()],
+        favourite_actor: actor.trim(),
+        favourite_director: director.trim(),
+        disliked_film: disliked.trim(),
+      };
+
+      if (await isDemoSession()) {
+        await saveDemoFilmProfile(profile);
+        router.replace('/(tabs)' as never);
+        return;
+      }
+
       const {
         data: { user },
         error: authError,
@@ -56,25 +72,18 @@ export default function FilmProfileScreen() {
         return;
       }
 
-      const profile: FilmProfile = {
-        top_films: [films[0].trim(), films[1].trim(), films[2].trim()],
-        favourite_actor: actor.trim(),
-        favourite_director: director.trim(),
-        disliked_film: disliked.trim(),
-      };
-
       const { error } = await supabase.from('interest_profiles').upsert(
         {
           user_id: user.id,
           category: 'films',
-          data: profile,
+          data: profile as unknown as Json,
         },
         { onConflict: 'user_id,category' },
       );
 
       if (error) throw error;
 
-      router.replace('/(tabs)/');
+      router.replace('/(tabs)' as never);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong.';
       Alert.alert('Error saving profile', message);
@@ -90,7 +99,7 @@ export default function FilmProfileScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.progress}>Step 2 of 2</Text>
-        <Pressable onPress={() => router.replace('/(tabs)/')} hitSlop={12}>
+        <Pressable onPress={() => router.replace('/(tabs)' as never)} hitSlop={12}>
           <Text style={styles.skip}>Skip for now</Text>
         </Pressable>
       </View>
@@ -101,20 +110,16 @@ export default function FilmProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>Your film taste</Text>
-        <Text style={styles.subtitle}>
-          Help us find people who share your passion for cinema.
-        </Text>
+        <Text style={styles.subtitle}>Help us find people who share your passion for cinema.</Text>
 
         <Text style={styles.sectionLabel}>Your top 3 films</Text>
         {(['Film 1', 'Film 2', 'Film 3'] as const).map((label, i) => (
           <View key={label} style={styles.inputGroup}>
             <Text style={styles.label}>{label}</Text>
-            <TextInput
-              style={styles.input}
+            <FormTextInput
               value={films[i as 0 | 1 | 2]}
               onChangeText={(v) => setFilm(i as 0 | 1 | 2, v)}
               placeholder={`e.g. ${['2001: A Space Odyssey', 'The Godfather', 'Mulholland Drive'][i]}`}
-              placeholderTextColor="#9ca3af"
               returnKeyType="next"
             />
           </View>
@@ -122,52 +127,42 @@ export default function FilmProfileScreen() {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Favourite actor</Text>
-          <TextInput
-            style={styles.input}
+          <FormTextInput
             value={actor}
             onChangeText={setActor}
             placeholder="e.g. Cate Blanchett"
-            placeholderTextColor="#9ca3af"
             returnKeyType="next"
           />
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Favourite director</Text>
-          <TextInput
-            style={styles.input}
+          <FormTextInput
             value={director}
             onChangeText={setDirector}
             placeholder="e.g. Stanley Kubrick"
-            placeholderTextColor="#9ca3af"
             returnKeyType="next"
           />
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>A film you dislike</Text>
-          <TextInput
-            style={styles.input}
+          <FormTextInput
             value={disliked}
             onChangeText={setDisliked}
             placeholder="e.g. Transformers"
-            placeholderTextColor="#9ca3af"
             returnKeyType="done"
             onSubmitEditing={handleSubmit}
           />
         </View>
 
-        <Pressable
-          style={[styles.button, (!allFilled || saving) && styles.buttonDisabled]}
+        <PrimaryButton
+          label="Save and continue"
           onPress={handleSubmit}
           disabled={!allFilled || saving}
-        >
-          {saving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Save &amp; continue</Text>
-          )}
-        </Pressable>
+          loading={saving}
+          style={styles.button}
+        />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -176,7 +171,7 @@ export default function FilmProfileScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -188,35 +183,35 @@ const styles = StyleSheet.create({
   },
   progress: {
     fontSize: 13,
-    color: '#6b7280',
-    fontWeight: '500',
+    color: colors.muted,
+    fontWeight: '600',
   },
   skip: {
     fontSize: 14,
-    color: '#6366f1',
-    fontWeight: '600',
+    color: colors.primary,
+    fontWeight: '700',
   },
   scroll: {
     paddingHorizontal: 20,
     paddingBottom: 48,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#111827',
+    fontSize: 28,
+    fontWeight: '800',
+    color: colors.text,
     marginTop: 12,
     marginBottom: 6,
   },
   subtitle: {
     fontSize: 15,
-    color: '#6b7280',
+    color: colors.muted,
     marginBottom: 28,
     lineHeight: 22,
   },
   sectionLabel: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
+    fontWeight: '800',
+    color: colors.text,
     marginBottom: 12,
   },
   inputGroup: {
@@ -224,33 +219,11 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontWeight: '500',
-    color: '#374151',
+    fontWeight: '700',
+    color: colors.muted,
     marginBottom: 6,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#f9fafb',
   },
   button: {
     marginTop: 8,
-    backgroundColor: '#6366f1',
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.45,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

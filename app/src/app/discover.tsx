@@ -9,8 +9,15 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api';
+import {
+  createDemoMatchedGroup,
+  demoGroupOptions,
+  isDemoSession,
+  joinDemoGroup,
+} from '@/lib/demoAuth';
 import type { GroupOption, MatchRequest } from '../../../shared/types';
 
 // ── Toast ────────────────────────────────────────────────────────────────────
@@ -42,7 +49,7 @@ function GroupCard({
   onJoin,
 }: {
   option: GroupOption;
-  onJoin: () => void;
+  onJoin: (option: GroupOption) => void;
 }) {
   const { group, member_count, shared_interests, preview_members } = option;
 
@@ -74,7 +81,7 @@ function GroupCard({
 
       <Pressable
         style={({ pressed }) => [styles.joinBtn, pressed && styles.joinBtnPressed]}
-        onPress={onJoin}
+        onPress={() => onJoin(option)}
         accessibilityRole="button"
         accessibilityLabel={`Join ${group.name}`}
       >
@@ -130,10 +137,17 @@ export default function DiscoverScreen() {
   // ── Init ──────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    isDemoSession().then((demo) => {
+      if (demo) {
+        setUserId('demo');
+        return;
+      }
+
+      supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return;
       setUserId(user.id);
       fetchPendingMatch(user.id);
+      });
     });
     return () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -172,6 +186,11 @@ export default function DiscoverScreen() {
     setSearchError(null);
     setSearchResults([]);
     try {
+      if (await isDemoSession()) {
+        setSearchResults(demoGroupOptions);
+        return;
+      }
+
       const res = await api.searchGroups({ user_id: userId, prompt_text: prompt.trim() });
       setSearchResults(res.options.slice(0, 3));
     } catch (e: unknown) {
@@ -186,6 +205,13 @@ export default function DiscoverScreen() {
     setMatchLoading(true);
     setMatchError(null);
     try {
+      if (await isDemoSession()) {
+        const groupId = await createDemoMatchedGroup();
+        setMatchConfirmed(true);
+        router.replace(`/match/${groupId}` as never);
+        return;
+      }
+
       await api.matchUsers({ user_id: userId });
       setMatchConfirmed(true);
       await fetchPendingMatch(userId);
@@ -196,8 +222,27 @@ export default function DiscoverScreen() {
     }
   }
 
-  function handleJoin() {
-    showToast('Coming soon');
+  async function handleJoin(option: GroupOption) {
+    try {
+      if (await isDemoSession()) {
+        const groupId = await joinDemoGroup(option);
+        router.replace(`/match/${groupId}` as never);
+        return;
+      }
+
+      if (!option.pending_user_ids?.length) {
+        showToast('This group option is no longer available');
+        return;
+      }
+
+      const group = await api.createGroup({
+        user_ids: option.pending_user_ids,
+        category: 'films',
+      });
+      router.replace(`/chat/${group.group_id}`);
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : 'Could not join group');
+    }
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -247,7 +292,7 @@ export default function DiscoverScreen() {
         {searchResults.length > 0 && (
           <View style={styles.results}>
             {searchResults.map((opt) => (
-              <GroupCard key={opt.group.id} option={opt} onJoin={handleJoin} />
+              <GroupCard key={opt.group.id || opt.group.name} option={opt} onJoin={handleJoin} />
             ))}
           </View>
         )}

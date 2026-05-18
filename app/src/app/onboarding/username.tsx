@@ -1,15 +1,10 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
+import { FormTextInput } from '@/components/FormTextInput';
+import { PrimaryButton } from '@/components/PrimaryButton';
+import { colors } from '@/components/theme';
+import { isDemoSession, saveDemoUsername } from '@/lib/demoAuth';
 import { supabase } from '@/lib/supabase';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
@@ -26,11 +21,8 @@ export default function UsernameScreen() {
 
     if (value.length === 0) {
       setValidationError(null);
-      return;
-    }
-
-    if (!USERNAME_REGEX.test(value)) {
-      setValidationError('3–20 characters, letters, numbers, underscores only');
+    } else if (!USERNAME_REGEX.test(value)) {
+      setValidationError('3-20 characters, letters, numbers, underscores only');
     } else {
       setValidationError(null);
     }
@@ -38,7 +30,7 @@ export default function UsernameScreen() {
 
   async function handleSubmit() {
     if (!USERNAME_REGEX.test(username)) {
-      setValidationError('3–20 characters, letters, numbers, underscores only');
+      setValidationError('3-20 characters, letters, numbers, underscores only');
       return;
     }
 
@@ -46,7 +38,12 @@ export default function UsernameScreen() {
     setServerError(null);
 
     try {
-      // 1. Check uniqueness
+      if (await isDemoSession()) {
+        await saveDemoUsername(username);
+        router.replace('/onboarding/film-profile');
+        return;
+      }
+
       const { data: existing, error: lookupError } = await supabase
         .from('users')
         .select('id')
@@ -63,8 +60,10 @@ export default function UsernameScreen() {
         return;
       }
 
-      // 2. Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
       if (userError || !user) {
         setServerError('Session expired. Please sign in again.');
@@ -72,10 +71,7 @@ export default function UsernameScreen() {
         return;
       }
 
-      // 3. Insert profile row
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert({ id: user.id, username });
+      const { error: insertError } = await supabase.from('users').insert({ id: user.id, username });
 
       if (insertError) {
         setServerError(insertError.message);
@@ -100,48 +96,31 @@ export default function UsernameScreen() {
         <View style={styles.header}>
           <Text style={styles.heading}>Choose your username</Text>
           <Text style={styles.subtext}>
-            This is how others will see you — keep it anonymous if you like
+            This is how others will see you. Keep it anonymous if you like.
           </Text>
         </View>
 
         <View style={styles.inputGroup}>
-          <TextInput
-            style={[styles.input, displayedError ? styles.inputError : null]}
+          <FormTextInput
             value={username}
             onChangeText={handleChange}
             placeholder="e.g. film_nerd_42"
-            placeholderTextColor="#4b5563"
             autoCapitalize="none"
             autoCorrect={false}
             autoFocus
             returnKeyType="done"
             onSubmitEditing={handleSubmit}
+            error={displayedError}
           />
-          <Text style={styles.rules}>
-            3–20 characters, letters, numbers, underscores only
-          </Text>
-          {displayedError ? (
-            <Text style={styles.errorText}>{displayedError}</Text>
-          ) : null}
+          <Text style={styles.rules}>3-20 characters, letters, numbers, underscores only</Text>
         </View>
 
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            (!isValid || loading) && styles.buttonDisabled,
-            pressed && isValid && !loading && styles.buttonPressed,
-          ]}
+        <PrimaryButton
+          label="Continue"
           onPress={handleSubmit}
           disabled={!isValid || loading}
-          accessibilityRole="button"
-          accessibilityLabel="Continue"
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Continue</Text>
-          )}
-        </Pressable>
+          loading={loading}
+        />
       </View>
     </KeyboardAvoidingView>
   );
@@ -150,7 +129,7 @@ export default function UsernameScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f0f',
+    backgroundColor: colors.background,
   },
   inner: {
     flex: 1,
@@ -164,53 +143,19 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#ffffff',
+    fontWeight: '800',
+    color: colors.text,
   },
   subtext: {
     fontSize: 14,
-    color: '#9ca3af',
+    color: colors.muted,
     lineHeight: 20,
   },
   inputGroup: {
     gap: 8,
   },
-  input: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#333333',
-    borderRadius: 8,
-    padding: 12,
-    color: '#ffffff',
-    fontSize: 16,
-  },
-  inputError: {
-    borderColor: '#f87171',
-  },
   rules: {
     fontSize: 12,
-    color: '#9ca3af',
-  },
-  errorText: {
-    fontSize: 13,
-    color: '#f87171',
-  },
-  button: {
-    backgroundColor: '#6366f1',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonPressed: {
-    opacity: 0.85,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.muted,
   },
 });

@@ -14,7 +14,7 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 export async function createGroup(req: HttpRequest, ctx: InvocationContext): Promise<HttpResponseInit> {
   try {
     const body = await req.json() as CreateGroupRequest;
-    const { user_ids, category } = body;
+    const { user_ids, category, match_request_id } = body;
 
     if (!user_ids?.length || user_ids.length < 4 || user_ids.length > 6) {
       return { status: 400, jsonBody: { error: 'Groups must have 4–6 members' } };
@@ -59,7 +59,7 @@ Output ONLY valid JSON with keys: group_name, summary, opener_message.`,
     // Create the group
     const { data: group, error: groupErr } = await supabase
       .from('groups')
-      .insert({ name: group_name, summary })
+      .insert({ name: group_name, summary, match_request_id: match_request_id ?? null })
       .select()
       .single();
 
@@ -78,6 +78,13 @@ Output ONLY valid JSON with keys: group_name, summary, opener_message.`,
       is_ai_opener: true,
     });
     if (msgErr) throw msgErr;
+
+    if (match_request_id) {
+      await supabase
+        .from('match_requests')
+        .update({ status: 'matched' })
+        .eq('id', match_request_id);
+    }
 
     const response: CreateGroupResponse = {
       group_id: group.id,

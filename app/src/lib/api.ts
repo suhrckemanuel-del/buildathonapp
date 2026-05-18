@@ -3,6 +3,7 @@
 // through the supabase client in supabase.ts — no need to route through functions.
 
 import type {
+  CreateGroupRequest, CreateGroupResponse,
   MatchUsersRequest, MatchUsersResponse,
   SearchGroupsRequest, SearchGroupsResponse,
 } from '../../../shared/types';
@@ -28,4 +29,7 @@ export const api = {
 
   searchGroups: (body: SearchGroupsRequest) =>
     post<SearchGroupsRequest, SearchGroupsResponse>('search-groups', body),
+
+  createGroup: (body: CreateGroupRequest) =>
+    post<CreateGroupRequest, CreateGroupResponse>('create-group', body),
 };
