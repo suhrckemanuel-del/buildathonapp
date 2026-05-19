@@ -100,6 +100,19 @@ body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta San
 .search-slabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .search-chips{display:flex;flex-wrap:wrap;gap:8px}
 .search-chip{padding:8px 16px;border-radius:100px;border:1.5px solid var(--border);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;touch-action:manipulation}
+/* ── Consent card ── */
+.consent-card{background:oklch(11% 0.012 268);border:1px solid var(--border);border-radius:20px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.consent-text{font-size:13px;font-weight:500;color:var(--muted);line-height:1.55}
+.consent-check-row{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.consent-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color 0.15s,background 0.15s}
+.consent-check.checked{border-color:var(--accent);background:var(--accent)}
+.consent-check-label{font-size:13px;font-weight:600;color:var(--text)}
+.btn-primary[aria-disabled="true"]{opacity:0.4;pointer-events:none}
+.settings-privacy-card{background:oklch(11% 0.010 268);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-top:8px;font-size:12.5px;line-height:1.6;color:var(--muted);display:none}
+.settings-privacy-card.open{display:block}
+.settings-privacy-card p{margin-bottom:6px}
+.settings-privacy-card p:last-child{margin-bottom:0}
+.settings-privacy-card strong{color:var(--text);font-weight:700}
 @keyframes _pi{from{opacity:0}to{opacity:1}}
 @keyframes _po{from{opacity:1}to{opacity:0}}
 body{animation:_pi .22s ease-out}
@@ -134,6 +147,14 @@ body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(62% 0.21 302)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a14.5 14.5 0 0 0 0 18 14.5 14.5 0 0 0 0-18"/><path d="M3 12h18"/></svg>
     Nationalities
   </span>
+
+  <div class="consent-card" aria-label="How we use your answers">
+    <p class="consent-text">Your answers go to one place — finding your group. No ads. No profiling. Deleted after 30 days.</p>
+    <label class="consent-check-row" id="consentLabel">
+      <div class="consent-check" id="consentCheck" role="checkbox" aria-checked="false" tabindex="0" aria-label="I consent to my interest profile being used to find a matched group"></div>
+      <span class="consent-check-label">I understand — find my group</span>
+    </label>
+  </div>
 
   <div>
     <h1 class="title">Your background</h1>
@@ -180,8 +201,9 @@ body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
 </main>
 
 <div class="cta-area">
-  <button class="btn-primary" onclick="navigate('v2-05-matching.html')">Find my people<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+  <button class="btn-primary" aria-disabled="true" onclick="navigate('v2-05-matching.html')">Find my people<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
   <p class="hint">Your answers are only shared with your matched group</p>
+  <p class="hint" style="margin-top:-4px">Interests kept for 30 days · Delete anytime in Settings</p>
 </div>
 
 <div class="backdrop" id="notifBackdrop"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">Notifications</div><div class="notif-list">
@@ -193,7 +215,14 @@ body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
 <div class="backdrop" id="settingsBackdrop"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">Settings</div>
   <div class="settings-slabel">Account</div>
   <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="settings-name">Edit Profile</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
-  <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="settings-name">Privacy</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+  <div class="settings-row" id="privacyRow" style="cursor:pointer"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="settings-name">Privacy</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+  <div class="settings-privacy-card" id="privacyCard">
+    <p><strong>What we store:</strong> username, your interest answers, match history</p>
+    <p><strong>What we never store:</strong> browsing, clicks, location, device data</p>
+    <p><strong>Who can see your data:</strong> only your matched group</p>
+    <p><strong>Delete everything:</strong> Settings → Account → Delete account</p>
+    <p><strong>Third-party AI:</strong> OpenAI (matching), Anthropic Claude (icebreaker)</p>
+  </div>
   <div class="settings-slabel">Preferences</div>
   <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><span class="settings-name">Push Notifications</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
   <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><span class="settings-name">Sounds</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
@@ -248,6 +277,27 @@ function updateProgress(){
 document.querySelectorAll('.q-input').forEach(i => i.addEventListener('input', updateProgress));
 document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => setTimeout(updateProgress, 0)));
 updateProgress();
+
+// Consent gate
+(function(){
+  const check = document.getElementById('consentCheck');
+  const label = document.getElementById('consentLabel');
+  const cta = document.querySelector('.btn-primary');
+  if (!check || !cta) return;
+  function toggle() {
+    const on = check.classList.toggle('checked');
+    check.setAttribute('aria-checked', String(on));
+    cta.setAttribute('aria-disabled', String(!on));
+  }
+  check.addEventListener('click', e => { e.stopPropagation(); toggle(); });
+  check.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); } });
+  label.addEventListener('click', e => { if (e.target !== check) toggle(); });
+})();
+
+// Privacy row
+document.getElementById('privacyRow').addEventListener('click', () => {
+  document.getElementById('privacyCard').classList.toggle('open');
+});
 </script>
 </body>
 </html>

@@ -229,11 +229,33 @@ body::before {
 }
 .ib-meta { display: flex; flex-direction: column; line-height: 1.2; flex: 1; }
 .ib-title { font-size: 13px; font-weight: 800; color: var(--text); letter-spacing: 0.01em; }
+.ib-sublabel { font-size: 10px; font-weight: 500; color: var(--muted); margin-top: 1px; }
 .ib-tag {
   font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
 }
+
+/* ── Success note ── */
+.success-note {
+  font-size: 13px; font-weight: 500; color: var(--muted);
+  text-align: center;
+  opacity: 0;
+  animation: fade-up 0.5s ease-out 0.5s forwards;
+}
+
+/* ── Skip AI path ── */
+.btn-skip-ai {
+  width: 100%; padding: 12px 0;
+  background: none; border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  cursor: pointer; touch-action: manipulation;
+  text-align: center;
+  transition: color 0.15s;
+  margin-top: 4px;
+}
+.btn-skip-ai:hover { color: var(--text); }
 .ib-regen {
   width: 36px; height: 36px;
   border-radius: 12px;
@@ -428,6 +450,8 @@ body.nav-out { animation: _po .16s ease-in forwards; pointer-events: none; }
     <button class="avatar av-4" aria-label="View members" data-member="all">YOU</button>
   </div>
 
+  <p class="success-note">✨ One message can start something real.</p>
+
   <!-- AI icebreaker -->
   <article class="icebreaker" aria-labelledby="ib-title">
     <div class="ib-head">
@@ -442,7 +466,8 @@ body.nav-out { animation: _po .16s ease-in forwards; pointer-events: none; }
       </div>
       <div class="ib-meta">
         <span class="ib-tag">AI icebreaker</span>
-        <span class="ib-title" id="ib-title">To get the chat going</span>
+        <span class="ib-title" id="ib-title">Try another opener</span>
+        <span class="ib-sublabel">AI-generated — always optional</span>
       </div>
       <button class="ib-regen" id="regenBtn" aria-label="Generate another icebreaker">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
@@ -536,6 +561,7 @@ body.nav-out { animation: _po .16s ease-in forwards; pointer-events: none; }
     </div>
 
     <button class="btn-sheet-cta" onclick="closeSheet('memberBackdrop'); navigate('06-group-chat.html')">Open group chat</button>
+    <button class="btn-skip-ai" onclick="closeSheet('memberBackdrop'); navigate('06-group-chat.html?skip_ai=1')">Skip the AI intro — go straight to chat</button>
   </div>
 </div>
 

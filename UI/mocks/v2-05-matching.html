@@ -217,10 +217,12 @@ body {
   border: 1.5px solid var(--border);
 }
 
+.step-body { display: flex; flex-direction: column; gap: 2px; }
 .step-label {
   font-size: 14px; font-weight: 600; color: var(--text);
 }
 .step.pending .step-label { color: var(--muted); }
+.step-note { font-size: 11px; font-weight: 500; color: var(--muted); }
 
 .spinner {
   width: 16px; height: 16px;
@@ -354,7 +356,10 @@ body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
       <div class="step-icon done" aria-label="Complete">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
       </div>
-      <span class="step-label">Analysing your taste</span>
+      <div class="step-body">
+        <span class="step-label">Analysing your taste</span>
+        <span class="step-note">We compare what you love — no browsing history, no tracking</span>
+      </div>
     </div>
     <div class="step pending">
       <div class="step-icon active" aria-label="In progress">

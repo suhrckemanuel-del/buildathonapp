@@ -70,6 +70,9 @@
   .pinned-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
   .pinned-label svg { width: 10px; height: 10px; }
   .pinned-text { font-size: 13px; color: var(--text); line-height: 1.55; }
+  .pinned-dismiss { width: 28px; height: 28px; border-radius: 8px; background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 150ms, background 150ms; touch-action: manipulation; align-self: flex-start; }
+  .pinned-dismiss:hover { color: var(--text); background: var(--surface2); }
+  .pinned-banner.dismissed { display: none; }
   .pinned-text strong { color: var(--accent); font-weight: 600; }
 
   /* ── Messages ── */
@@ -183,12 +186,15 @@
     <div class="pinned-content">
       <div class="pinned-label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21"/></svg>
-        AI icebreaker
+        AI got the ball rolling — the rest is you 🤝
       </div>
       <p class="pinned-text">
         You all play FPS games. <strong>Maya</strong> thinks she belongs in Gold (her words), <strong>Jordan</strong> just hit Diamond in Apex, and <strong>Sasha</strong> exclusively games at 2am. Also apparently all three of you are terrible at any fighting game. Who wants to admit which fighting game humbled them most?
       </p>
     </div>
+    <button class="pinned-dismiss" aria-label="Dismiss AI message" onclick="this.closest('.pinned-banner').classList.add('dismissed')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
   </div>
 
   <!-- Messages -->
@@ -274,6 +280,11 @@ if (ta) {
 }
 const msgs = document.querySelector('.messages');
 if (msgs) msgs.scrollTop = msgs.scrollHeight;
+
+if (new URLSearchParams(location.search).get('skip_ai') === '1') {
+  const banner = document.querySelector('.pinned-banner');
+  if (banner) banner.classList.add('dismissed');
+}
 </script>
 </body>
 </html>

@@ -170,6 +170,21 @@ body {
 }
 .footer-text a { color: var(--text); font-weight: 700; text-decoration: none; }
 
+/* ── Why we exist card ── */
+.why-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px 22px;
+  margin-bottom: 28px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.why-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 600; color: var(--text);
+}
+.why-dot { color: var(--accent); font-size: 10px; flex-shrink: 0; }
+
 @keyframes _pi{from{opacity:0}to{opacity:1}}
 @keyframes _po{from{opacity:1}to{opacity:0}}
 body{animation:_pi .22s ease-out}
@@ -203,6 +218,11 @@ body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
 </div>
 
 <main class="form-body">
+  <div class="why-card" aria-label="How InterestMatch works">
+    <div class="why-item"><span class="why-dot">✦</span> Tell us what you're into</div>
+    <div class="why-item"><span class="why-dot">✦</span> We find a small group who gets it</div>
+    <div class="why-item"><span class="why-dot">✦</span> One icebreaker. Real people. Go from there.</div>
+  </div>
   <h1 class="page-title">Sign In</h1>
 
   <form action="v2-01-splash.html" method="get" novalidate>
