@@ -23,9 +23,19 @@ import {
   recordDemoSafetyAction,
 } from '@/lib/demoAuth';
 import { supabase } from '@/lib/supabase';
-import type { Message } from '../../../../shared/types';
+import type { Message, RSVPStatus } from '../../../../shared/types';
 
 type MessageWithSender = Message & { sender_username?: string | null };
+
+type ChatEvent = {
+  id: string;
+  group_id: string;
+  title: string;
+  description: string | null;
+  event_at: string;
+  created_by: string;
+  rsvps: { going: number; maybe: number; not_going: number; mine: RSVPStatus | null };
+};
 
 export default function ChatScreen() {
   const { groupId } = useLocalSearchParams<{ groupId: string }>();
@@ -36,6 +46,7 @@ export default function ChatScreen() {
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [events, setEvents] = useState<ChatEvent[]>([]);
 
   const flatListRef = useRef<FlatList<MessageWithSender>>(null);
 
@@ -57,11 +68,43 @@ export default function ChatScreen() {
     [fetchUsername],
   );
 
+  const fetchEvents = useCallback(
+    async (userId: string): Promise<ChatEvent[]> => {
+      if (!groupId) return [];
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, group_id, title, description, event_at, created_by, event_rsvps(user_id, status)')
+        .eq('group_id', groupId)
+        .order('event_at', { ascending: true });
+      if (error || !data) return [];
+      return (data as any[]).map((e) => {
+        const rsvps = e.event_rsvps ?? [];
+        const counts = { going: 0, maybe: 0, not_going: 0 };
+        let mine: RSVPStatus | null = null;
+        for (const r of rsvps) {
+          counts[r.status as RSVPStatus] = (counts[r.status as RSVPStatus] ?? 0) + 1;
+          if (r.user_id === userId) mine = r.status as RSVPStatus;
+        }
+        return {
+          id: e.id,
+          group_id: e.group_id,
+          title: e.title,
+          description: e.description,
+          event_at: e.event_at,
+          created_by: e.created_by,
+          rsvps: { ...counts, mine },
+        };
+      });
+    },
+    [groupId],
+  );
+
   useEffect(() => {
     if (!groupId) return;
 
     let subscribed = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    let eventsChannel: ReturnType<typeof supabase.channel> | null = null;
 
     async function bootstrap() {
       if (await isDemoSession()) {
@@ -119,6 +162,32 @@ export default function ChatScreen() {
           },
         )
         .subscribe();
+
+      const userId = user?.id ?? null;
+      if (userId) {
+        const initialEvents = await fetchEvents(userId);
+        if (subscribed) setEvents(initialEvents);
+
+        const refetch = async () => {
+          if (!subscribed) return;
+          const fresh = await fetchEvents(userId);
+          if (subscribed) setEvents(fresh);
+        };
+
+        eventsChannel = supabase
+          .channel(`chat-events:${groupId}`)
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'events', filter: `group_id=eq.${groupId}` },
+            refetch,
+          )
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'event_rsvps' },
+            refetch,
+          )
+          .subscribe();
+      }
     }
 
     bootstrap();
@@ -126,8 +195,9 @@ export default function ChatScreen() {
     return () => {
       subscribed = false;
       if (channel) supabase.removeChannel(channel);
+      if (eventsChannel) supabase.removeChannel(eventsChannel);
     };
-  }, [groupId, enrichMessage]);
+  }, [groupId, enrichMessage, fetchEvents]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -157,6 +227,26 @@ export default function ChatScreen() {
 
     if (error) setInputText(content);
     setSending(false);
+  }
+
+  async function handleRSVP(eventId: string, status: RSVPStatus) {
+    if (!currentUserId) return;
+    setEvents((prev) =>
+      prev.map((e) => {
+        if (e.id !== eventId) return e;
+        const counts = { ...e.rsvps };
+        if (e.rsvps.mine) counts[e.rsvps.mine] = Math.max(0, counts[e.rsvps.mine] - 1);
+        counts[status] = (counts[status] ?? 0) + 1;
+        return { ...e, rsvps: { ...counts, mine: status } };
+      }),
+    );
+    const { error } = await supabase
+      .from('event_rsvps')
+      .upsert(
+        { event_id: eventId, user_id: currentUserId, status },
+        { onConflict: 'event_id,user_id' },
+      );
+    if (error) Alert.alert('Could not RSVP', error.message);
   }
 
   async function handleLeaveGroup() {
@@ -231,14 +321,68 @@ export default function ChatScreen() {
             <ActivityIndicator color="#a78bfa" size="large" />
           </View>
         ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={styles.listContent}
-            onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
-          />
+          <>
+            {(() => {
+              const opener = messages.find((m) => m.is_ai_opener);
+              if (!opener) return null;
+              return (
+                <View style={styles.icebreakerCard}>
+                  <Text style={styles.icebreakerLabel}>AI ICEBREAKER</Text>
+                  <Text style={styles.icebreakerText}>{opener.content}</Text>
+                </View>
+              );
+            })()}
+            <View style={styles.eventsStrip}>
+              <View style={styles.eventsHeader}>
+                <Text style={styles.eventsTitle}>Plans</Text>
+                <Pressable
+                  onPress={() => router.push(`/events/create?groupId=${groupId}` as never)}
+                  hitSlop={8}
+                >
+                  <Text style={styles.eventsAdd}>+ Plan event</Text>
+                </Pressable>
+              </View>
+              {events.length === 0 ? (
+                <Text style={styles.eventsEmpty}>No plans yet. Tap + to start one.</Text>
+              ) : (
+                events.slice(0, 2).map((ev) => (
+                  <View key={ev.id} style={styles.eventCard}>
+                    <View style={styles.eventCardHeader}>
+                      <Text style={styles.eventCardTitle} numberOfLines={1}>
+                        {ev.title}
+                      </Text>
+                      <Text style={styles.eventCardDate}>{formatEventDate(ev.event_at)}</Text>
+                    </View>
+                    <View style={styles.rsvpRow}>
+                      {(['going', 'maybe', 'not_going'] as RSVPStatus[]).map((s) => {
+                        const active = ev.rsvps.mine === s;
+                        const count = ev.rsvps[s] ?? 0;
+                        return (
+                          <Pressable
+                            key={s}
+                            onPress={() => handleRSVP(ev.id, s)}
+                            style={[styles.rsvpPill, active && styles.rsvpPillActive]}
+                          >
+                            <Text style={[styles.rsvpPillText, active && styles.rsvpPillTextActive]}>
+                              {rsvpLabel(s)} · {count}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ))
+              )}
+            </View>
+            <FlatList
+              ref={flatListRef}
+              data={messages.filter((m) => !m.is_ai_opener)}
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem}
+              contentContainerStyle={styles.listContent}
+              onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
+            />
+          </>
         )}
 
         <View style={styles.safetyRow}>
@@ -315,6 +459,19 @@ function formatTime(value: string) {
   return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+function formatEventDate(value: string) {
+  const d = new Date(value);
+  const date = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return `${date} · ${time}`;
+}
+
+function rsvpLabel(s: RSVPStatus) {
+  if (s === 'going') return 'Going';
+  if (s === 'maybe') return 'Maybe';
+  return 'Pass';
+}
+
 function labelForAction(action: 'report' | 'mute' | 'block') {
   if (action === 'report') return 'Report';
   if (action === 'mute') return 'Mute';
@@ -381,4 +538,104 @@ const styles = StyleSheet.create({
   sendButtonDisabled: { backgroundColor: '#374151' },
   sendButtonPressed: { opacity: 0.8 },
   sendButtonText: { color: '#ffffff', fontSize: 18, fontWeight: '700', lineHeight: 20 },
+  icebreakerCard: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 14,
+    backgroundColor: '#1c1c26',
+    borderRadius: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: '#6366f1',
+  },
+  icebreakerLabel: {
+    color: '#6366f1',
+    fontWeight: '800',
+    fontSize: 11,
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  icebreakerText: { color: '#f0f0ff', fontSize: 14, lineHeight: 20 },
+  eventsStrip: {
+    marginHorizontal: 16,
+    marginTop: 10,
+    padding: 12,
+    backgroundColor: '#13131a',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#2a2a3a',
+    gap: 10,
+  },
+  eventsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  eventsTitle: {
+    color: '#f0f0ff',
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
+  eventsAdd: {
+    color: '#a78bfa',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  eventsEmpty: {
+    color: '#6b7280',
+    fontSize: 12,
+    fontStyle: 'italic',
+  },
+  eventCard: {
+    backgroundColor: '#0f0f17',
+    borderRadius: 10,
+    padding: 10,
+    gap: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#7c3aed',
+  },
+  eventCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
+  },
+  eventCardTitle: {
+    flex: 1,
+    color: '#f0f0ff',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  eventCardDate: {
+    color: '#9ca3af',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  rsvpRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  rsvpPill: {
+    flex: 1,
+    paddingVertical: 7,
+    paddingHorizontal: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#2a2a3a',
+    backgroundColor: '#0a0a0f',
+    alignItems: 'center',
+  },
+  rsvpPillActive: {
+    borderColor: '#7c3aed',
+    backgroundColor: '#7c3aed22',
+  },
+  rsvpPillText: {
+    color: '#9ca3af',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  rsvpPillTextActive: {
+    color: '#f0f0ff',
+  },
 });

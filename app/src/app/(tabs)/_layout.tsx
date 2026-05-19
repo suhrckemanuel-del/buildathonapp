@@ -11,14 +11,14 @@ export default function TabsLayout() {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
           borderTopWidth: 1,
-          height: 68,
+          height: 72,
           paddingTop: 8,
           paddingBottom: 10,
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '700',
         },
       }}
@@ -28,15 +28,23 @@ export default function TabsLayout() {
         options={{
           title: 'Groups',
           tabBarLabel: 'Groups',
-          tabBarIcon: ({ color }) => <TabIcon label="G" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon glyph={'\u{1F4AC}'} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="discover"
         options={{
           title: 'Discover',
           tabBarLabel: 'Discover',
-          tabBarIcon: ({ color }) => <TabIcon label="D" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon glyph={'\u{1F9ED}'} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="events"
+        options={{
+          title: 'Events',
+          tabBarLabel: 'Events',
+          tabBarIcon: ({ color }) => <TabIcon glyph={'\u{1F4C5}'} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -44,13 +52,13 @@ export default function TabsLayout() {
         options={{
           title: 'Profile',
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color }) => <TabIcon label="P" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon glyph={'\u{1F464}'} color={color} />,
         }}
       />
     </Tabs>
   );
 }
 
-function TabIcon({ label, color }: { label: string; color: string }) {
-  return <Text style={{ color, fontSize: 16, lineHeight: 20, fontWeight: '900' }}>{label}</Text>;
+function TabIcon({ glyph, color }: { glyph: string; color: string }) {
+  return <Text style={{ color, fontSize: 18, lineHeight: 22 }}>{glyph}</Text>;
 }

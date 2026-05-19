@@ -19,7 +19,7 @@ import {
   isDemoSession,
   joinDemoGroup,
 } from '@/lib/demoAuth';
-import type { GroupOption, MatchRequest } from '../../../shared/types';
+import type { GroupOption, MatchRequest } from '../../../../shared/types';
 
 // ── Toast ────────────────────────────────────────────────────────────────────
 

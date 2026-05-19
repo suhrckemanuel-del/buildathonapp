@@ -40,7 +40,7 @@ export default function UsernameScreen() {
     try {
       if (await isDemoSession()) {
         await saveDemoUsername(username);
-        router.replace('/onboarding/film-profile');
+        router.replace('/onboarding/select-category');
         return;
       }
 
@@ -78,7 +78,7 @@ export default function UsernameScreen() {
         return;
       }
 
-      router.replace('/onboarding/film-profile');
+      router.replace('/onboarding/select-category');
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@
   "name": "buildathon-functions",
   "version": "1.0.0",
   "description": "Azure Functions backend for Buildathon app",
-  "main": "dist/index.js",
+  "main": "dist/functions/index.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -12,7 +12,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@azure/functions": "^4.0.0",
-    "@supabase/supabase-js": "^2.49.0"
+    "@supabase/supabase-js": "^2.49.0",
+    "cheerio": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "~5.9.2",

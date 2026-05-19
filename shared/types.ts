@@ -15,7 +15,7 @@ export interface User {
 }
 
 // ── Interest Profile ─────────────────────────────────────────
-export type InterestCategory = 'films'; // extend: 'sports' | 'games' | 'nationality'
+export type InterestCategory = 'films' | 'games'; // extend: 'sports' | 'nationality'
 
 export interface FilmProfile {
   top_films: [string, string, string];   // exactly 3
@@ -24,11 +24,21 @@ export interface FilmProfile {
   disliked_film: string;
 }
 
+export interface GamingProfile {
+  top_games: [string, string, string];   // exactly 3
+  favourite_genre: string;               // single primary genre (chip select)
+  genres: string[];                      // all selected genre chips
+  recently_played: string;
+  shame_game: string;
+}
+
+export type InterestProfileData = FilmProfile | GamingProfile;
+
 export interface InterestProfile {
   id: string;
   user_id: UserId;
   category: InterestCategory;
-  data: FilmProfile;                     // union as more categories added
+  data: InterestProfileData;
   created_at: string;
   updated_at: string;
 }
@@ -107,6 +117,18 @@ export interface MatchUsersResponse {
   match_request_id: string;
   expires_at: string;
   message: string;
+  group_id?: GroupId;
+  immediate?: boolean;
+}
+
+// POST /api/embed-profile
+export interface EmbedProfileRequest {
+  user_id: UserId;
+  category: InterestCategory;
+}
+export interface EmbedProfileResponse {
+  ok: boolean;
+  dimensions: number;
 }
 
 // POST /api/create-group  (called internally by match job, not by frontend)
@@ -129,4 +151,32 @@ export interface SearchGroupsRequest {
 }
 export interface SearchGroupsResponse {
   options: GroupOption[];
+}
+
+// POST /api/letterboxd-import
+export interface LetterboxdImportRequest {
+  username: string;
+}
+export interface LetterboxdImportResponse {
+  top_films: [string, string, string];
+  username_valid: boolean;
+}
+
+// ── Events ──────────────────────────────────────────────────
+export type RSVPStatus = 'going' | 'maybe' | 'not_going';
+
+export interface Event {
+  id: string;
+  group_id: GroupId;
+  created_by: UserId;
+  title: string;
+  description: string | null;
+  event_at: string;
+  created_at: string;
+}
+
+export interface EventRSVP {
+  event_id: string;
+  user_id: UserId;
+  status: RSVPStatus;
 }

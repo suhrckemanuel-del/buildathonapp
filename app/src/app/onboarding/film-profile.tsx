@@ -12,7 +12,8 @@ import {
 import { router } from 'expo-router';
 import { FormTextInput } from '@/components/FormTextInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { colors } from '@/components/theme';
+import { colors, radii } from '@/components/theme';
+import { api } from '@/lib/api';
 import { isDemoSession, saveDemoFilmProfile } from '@/lib/demoAuth';
 import { supabase } from '@/lib/supabase';
 import type { Json } from '@/lib/database.types';
@@ -24,6 +25,45 @@ export default function FilmProfileScreen() {
   const [director, setDirector] = useState('');
   const [disliked, setDisliked] = useState('');
   const [saving, setSaving] = useState(false);
+  const [letterboxdOpen, setLetterboxdOpen] = useState(false);
+  const [letterboxdUsername, setLetterboxdUsername] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+
+  const handleLetterboxdImport = async () => {
+    setImportError(null);
+    setImportSuccess(null);
+    const trimmed = letterboxdUsername.trim();
+    if (!trimmed) {
+      setImportError('Enter your Letterboxd username.');
+      return;
+    }
+    setImporting(true);
+    try {
+      if (await isDemoSession()) {
+        setFilms(['2001: A Space Odyssey', 'Mulholland Drive', 'The Godfather']);
+        setImportSuccess('Pulled your top 3 — feel free to edit.');
+        return;
+      }
+      const res = await api.letterboxdImport({ username: trimmed });
+      if (!res.top_films?.[0]) {
+        setImportError('No 5-star ratings found — fill them in below.');
+        return;
+      }
+      setFilms(res.top_films);
+      setImportSuccess('Pulled your top 3 — feel free to edit.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Import failed.';
+      setImportError(
+        message.includes('404')
+          ? 'Letterboxd profile not found.'
+          : "Couldn't reach Letterboxd — fill in manually.",
+      );
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const setFilm = (index: 0 | 1 | 2, value: string) => {
     setFilms((prev) => {
@@ -83,6 +123,9 @@ export default function FilmProfileScreen() {
 
       if (error) throw error;
 
+      // Fire-and-forget: populate embedding column so matching can use it
+      api.embedProfile({ user_id: user.id, category: 'films' }).catch(() => {});
+
       router.replace('/(tabs)' as never);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong.';
@@ -111,6 +154,43 @@ export default function FilmProfileScreen() {
       >
         <Text style={styles.title}>Your film taste</Text>
         <Text style={styles.subtitle}>Help us find people who share your passion for cinema.</Text>
+
+        <View style={styles.letterboxdCard}>
+          {!letterboxdOpen ? (
+            <Pressable onPress={() => setLetterboxdOpen(true)} style={styles.letterboxdButton}>
+              <Text style={styles.letterboxdButtonText}>Import from Letterboxd</Text>
+              <Text style={styles.letterboxdHint}>
+                We'll read your public ratings — no login required.
+              </Text>
+            </Pressable>
+          ) : (
+            <View>
+              <Text style={styles.letterboxdConsent}>
+                This reads your public Letterboxd ratings. We never ask for your password or login.
+              </Text>
+              <View style={styles.letterboxdRow}>
+                <View style={styles.letterboxdInput}>
+                  <FormTextInput
+                    value={letterboxdUsername}
+                    onChangeText={setLetterboxdUsername}
+                    placeholder="Your Letterboxd username"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
+                <Pressable
+                  onPress={handleLetterboxdImport}
+                  disabled={importing}
+                  style={[styles.letterboxdGo, importing && { opacity: 0.6 }]}
+                >
+                  <Text style={styles.letterboxdGoText}>{importing ? '…' : 'Import'}</Text>
+                </Pressable>
+              </View>
+              {importError ? <Text style={styles.letterboxdError}>{importError}</Text> : null}
+              {importSuccess ? <Text style={styles.letterboxdSuccess}>{importSuccess}</Text> : null}
+            </View>
+          )}
+        </View>
 
         <Text style={styles.sectionLabel}>Your top 3 films</Text>
         {(['Film 1', 'Film 2', 'Film 3'] as const).map((label, i) => (
@@ -226,4 +306,31 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 8,
   },
+  letterboxdCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.films + '55',
+    borderRadius: radii.lg,
+    padding: 16,
+    marginBottom: 24,
+  },
+  letterboxdButton: { gap: 4 },
+  letterboxdButtonText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: colors.films,
+  },
+  letterboxdHint: { fontSize: 12, color: colors.muted },
+  letterboxdConsent: { fontSize: 12, color: colors.muted, marginBottom: 10, lineHeight: 17 },
+  letterboxdRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  letterboxdInput: { flex: 1 },
+  letterboxdGo: {
+    backgroundColor: colors.films,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: radii.md,
+  },
+  letterboxdGoText: { color: '#fff', fontWeight: '800' },
+  letterboxdError: { color: colors.danger, fontSize: 12, marginTop: 8 },
+  letterboxdSuccess: { color: colors.success, fontSize: 12, marginTop: 8 },
 });

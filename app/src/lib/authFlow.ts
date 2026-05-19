@@ -10,13 +10,14 @@ export async function getPostLoginRoute(userId: string) {
   if (userError) throw userError;
   if (!userRow) return '/onboarding/username';
 
-  const { data: filmRow, error: filmError } = await supabase
+  // Any interest profile = onboarding complete
+  const { data: profileRow, error: profileError } = await supabase
     .from('interest_profiles')
     .select('id')
     .eq('user_id', userId)
-    .eq('category', 'films')
+    .limit(1)
     .maybeSingle();
 
-  if (filmError) throw filmError;
-  return filmRow ? '/(tabs)' : '/onboarding/film-profile';
+  if (profileError) throw profileError;
+  return profileRow ? '/(tabs)' : '/onboarding/select-category';
 }

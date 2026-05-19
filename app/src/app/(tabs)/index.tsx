@@ -141,17 +141,38 @@ export default function GroupsScreen() {
   );
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || userId === 'demo') return;
 
-    const channel = supabase
-      .channel(`groups-home:${userId}`)
+    let subscribed = true;
+    const messagesChannel = supabase
+      .channel(`groups-home-messages:${userId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
-        loadGroups(true);
+        if (subscribed) loadGroups(true);
       })
       .subscribe();
 
+    // Fires when this user is added to a brand-new group (e.g. via match-users
+    // pipeline grouping them with others).
+    const membersChannel = supabase
+      .channel(`groups-home-members:${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'group_members',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          if (subscribed) loadGroups(true);
+        },
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      subscribed = false;
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(membersChannel);
     };
   }, [loadGroups, userId]);
 

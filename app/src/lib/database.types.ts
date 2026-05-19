@@ -42,6 +42,18 @@ export interface Database {
         Update: {};
         Relationships: [];
       };
+      events: {
+        Row: { id: string; group_id: string; created_by: string; title: string; description: string | null; event_at: string; created_at: string };
+        Insert: { group_id: string; created_by: string; title: string; description?: string | null; event_at: string };
+        Update: { title?: string; description?: string | null; event_at?: string };
+        Relationships: [];
+      };
+      event_rsvps: {
+        Row: { event_id: string; user_id: string; status: 'going' | 'maybe' | 'not_going' };
+        Insert: { event_id: string; user_id: string; status?: 'going' | 'maybe' | 'not_going' };
+        Update: { status?: 'going' | 'maybe' | 'not_going' };
+        Relationships: [];
+      };
       safety_events: {
         Row: {
           id: string;

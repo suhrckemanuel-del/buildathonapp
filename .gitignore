@@ -21,3 +21,7 @@ UI.bak
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Test scratch + intermediate planning docs
+functions/__test/
+HANDOFF_FUNCTIONALITY_PROMPT.md
