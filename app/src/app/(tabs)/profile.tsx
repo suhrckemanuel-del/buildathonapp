@@ -4,7 +4,8 @@ import { router, useFocusEffect } from 'expo-router';
 import { AvatarCircle } from '@/components/AvatarCircle';
 import { InterestTag } from '@/components/InterestTag';
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { colors } from '@/components/theme';
+import { AppHeader } from '@/components/v2';
+import { colors, radii } from '@/components/theme';
 import {
   clearDemoSession,
   getDemoFilmProfile,
@@ -99,8 +100,17 @@ export default function ProfileScreen() {
   const hasAny = !!(profile.filmProfile || profile.gamingProfile);
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Profile</Text>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+    >
+      <AppHeader
+        eyebrow="Taste profile"
+        title="Profile"
+        subtitle="The signals that help groups form around something you can actually do together."
+      />
 
       {loading ? (
         <View style={styles.centered}>
@@ -132,7 +142,7 @@ export default function ProfileScreen() {
           </View>
 
           {profile.filmProfile ? (
-            <View style={[styles.card, { borderColor: colors.films + '55' }]}>
+            <View style={[styles.card, styles.filmCard]}>
               <View style={styles.cardHeader}>
                 <Text style={styles.cardTitle}>Film taste</Text>
                 <View style={[styles.pill, { borderColor: colors.films, backgroundColor: colors.films + '1a' }]}>
@@ -153,7 +163,7 @@ export default function ProfileScreen() {
           ) : null}
 
           {profile.gamingProfile ? (
-            <View style={[styles.card, { borderColor: colors.gaming + '55' }]}>
+            <View style={[styles.card, styles.gamingCard]}>
               <View style={styles.cardHeader}>
                 <Text style={styles.cardTitle}>Gaming taste</Text>
                 <View style={[styles.pill, { borderColor: colors.gaming, backgroundColor: colors.gaming + '1a' }]}>
@@ -195,6 +205,14 @@ export default function ProfileScreen() {
             onPress={() => router.push('/onboarding/select-category')}
           />
           <PrimaryButton
+            label="Start over"
+            onPress={async () => {
+              await clearDemoSession();
+              router.replace('/');
+            }}
+            variant="subtle"
+          />
+          <PrimaryButton
             label="Sign out"
             onPress={handleSignOut}
             loading={signingOut}
@@ -217,15 +235,14 @@ function ProfileLine({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
-  content: { paddingHorizontal: 20, paddingTop: 56, paddingBottom: 48, gap: 16 },
-  title: { color: colors.text, fontSize: 28, fontWeight: '800' },
+  content: { paddingHorizontal: 20, paddingTop: 0, paddingBottom: 48, gap: 16 },
   centered: { alignItems: 'center', gap: 12, paddingVertical: 48 },
   muted: { color: colors.muted },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    borderRadius: 16,
+    borderRadius: radii.xl,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
@@ -234,13 +251,15 @@ const styles = StyleSheet.create({
   profileCopy: { flex: 1, minWidth: 0 },
   username: { color: colors.text, fontSize: 20, fontWeight: '800' },
   card: {
-    borderRadius: 16,
+    borderRadius: radii.xl,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
     padding: 16,
     gap: 14,
   },
+  filmCard: { borderColor: colors.films + '77', backgroundColor: '#241115' },
+  gamingCard: { borderColor: colors.gaming + '77', backgroundColor: '#0f1d3d' },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardTitle: { color: colors.text, fontSize: 18, fontWeight: '800' },
   pill: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
@@ -256,5 +275,5 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   lineValue: { color: colors.text, fontSize: 15, fontWeight: '600' },
-  secondaryButton: { backgroundColor: '#2a2a2a' },
+  secondaryButton: { backgroundColor: colors.surfaceRaised },
 });

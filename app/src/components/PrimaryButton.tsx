@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radii } from './theme';
 
 type PrimaryButtonProps = {
@@ -8,6 +9,7 @@ type PrimaryButtonProps = {
   disabled?: boolean;
   style?: ViewStyle;
   accessibilityLabel?: string;
+  variant?: 'primary' | 'light' | 'subtle';
 };
 
 export function PrimaryButton({
@@ -17,6 +19,7 @@ export function PrimaryButton({
   disabled = false,
   style,
   accessibilityLabel,
+  variant = 'primary',
 }: PrimaryButtonProps) {
   const isDisabled = disabled || loading;
 
@@ -28,12 +31,15 @@ export function PrimaryButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.root,
+        variant === 'light' && styles.light,
+        variant === 'subtle' && styles.subtle,
         pressed && !isDisabled && styles.pressed,
         isDisabled && styles.disabled,
         style,
       ]}
     >
-      {loading ? <ActivityIndicator color={colors.text} /> : <Text style={styles.text}>{label}</Text>}
+      {variant === 'primary' ? <LinearGradient colors={[colors.primary, colors.violet]} style={StyleSheet.absoluteFill} /> : null}
+      {loading ? <ActivityIndicator color={variant === 'light' ? colors.background : colors.text} /> : <Text style={[styles.text, variant === 'light' && styles.lightText]}>{label}</Text>}
     </Pressable>
   );
 }
@@ -41,15 +47,24 @@ export function PrimaryButton({
 const styles = StyleSheet.create({
   root: {
     minHeight: 52,
-    borderRadius: radii.md,
+    borderRadius: radii.pill,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 18,
     paddingVertical: 14,
+    overflow: 'hidden',
   },
   pressed: {
-    backgroundColor: colors.primaryPressed,
+    opacity: 0.86,
+  },
+  light: {
+    backgroundColor: colors.text,
+  },
+  subtle: {
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   disabled: {
     opacity: 0.5,
@@ -58,5 +73,8 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
     fontWeight: '700',
+  },
+  lightText: {
+    color: colors.background,
   },
 });

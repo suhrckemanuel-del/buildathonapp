@@ -35,6 +35,6 @@ export async function embedProfile(
 
 app.http('embed-profile', {
   methods: ['POST'],
-  authLevel: 'function',
+  authLevel: 'anonymous',
   handler: embedProfile,
 });

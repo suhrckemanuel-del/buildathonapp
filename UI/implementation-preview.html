@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buildathon App - Implementation Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --page: #07070b;
+  --bg: #0a0a0f;
+  --surface: #13131a;
+  --raised: #1c1c26;
+  --border: #2a2a3a;
+  --text: #f0f0ff;
+  --muted: #9ca3af;
+  --subdued: #6b7280;
+  --violet: #6366f1;
+  --blue: #3b82f6;
+  --red: #e53935;
+  --green: #22c55e;
+  --yellow: #f4d03f;
+}
+body {
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--text);
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  padding: 28px;
+}
+.intro {
+  max-width: 1180px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+.intro h1 {
+  font-family: "Righteous", sans-serif;
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.intro p {
+  max-width: 560px;
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 14px;
+}
+.storyboard {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 22px;
+}
+.phone {
+  width: 100%;
+  min-height: 720px;
+  border: 1px solid #222232;
+  border-radius: 30px;
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 24px 70px rgba(0,0,0,.42);
+}
+.phone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 76% 8%, rgba(99,102,241,.22), transparent 30%),
+    radial-gradient(circle at 8% 28%, rgba(59,130,246,.16), transparent 26%);
+}
+.phone-content {
+  position: relative;
+  z-index: 1;
+  min-height: 720px;
+  padding: 42px 18px 92px;
+}
+.screen-label {
+  color: var(--subdued);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  margin-bottom: 12px;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.logo, .icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 0;
+}
+.logo { background: var(--text); color: var(--bg); font-weight: 900; }
+.icon { background: transparent; color: var(--text); border: 1px solid transparent; }
+.icon-row { display: flex; gap: 8px; }
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--violet);
+  position: absolute;
+  margin-left: 18px;
+  margin-top: -18px;
+}
+h2 {
+  font-family: "Righteous", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.05;
+  margin-bottom: 8px;
+}
+.subtitle {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+  margin-bottom: 18px;
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hero-card {
+  border-radius: 24px;
+  min-height: 184px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(145deg, #20205f, #3b82f6);
+  overflow: hidden;
+  position: relative;
+}
+.hero-card::after, .category-card::after, .match-card::after {
+  content: "";
+  position: absolute;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  right: -34px;
+  bottom: -44px;
+  background: rgba(255,255,255,.13);
+}
+.hero-card h3, .category-card h3 {
+  font-family: "Righteous", sans-serif;
+  font-weight: 400;
+  font-size: 28px;
+  position: relative;
+  z-index: 1;
+}
+.hero-card p, .category-card p {
+  color: rgba(255,255,255,.82);
+  font-size: 13px;
+  line-height: 1.4;
+  margin-top: 6px;
+  position: relative;
+  z-index: 1;
+}
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.category-card {
+  min-height: 132px;
+  border-radius: 22px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.films { background: linear-gradient(145deg, #461719, #e53935); }
+.music { background: linear-gradient(145deg, #423306, #d7ae25); color: #151208; }
+.sports { background: linear-gradient(145deg, #0c3520, #22c55e); color: #07120b; }
+.gaming { background: linear-gradient(145deg, #12225c, #3b82f6); }
+.input {
+  min-height: 50px;
+  border-radius: 25px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 13px;
+}
+.textarea {
+  min-height: 96px;
+  border-radius: 20px;
+  align-items: flex-start;
+  padding-top: 16px;
+}
+.btn {
+  min-height: 52px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--violet);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 14px;
+}
+.secondary-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.chip.active {
+  border-color: var(--blue);
+  background: rgba(59,130,246,.17);
+  color: #cfe1ff;
+}
+.question-card, .list-card, .profile-card, .event-card, .match-card {
+  background: rgba(19,19,26,.94);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 15px;
+}
+.question-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.small-label {
+  color: var(--subdued);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+}
+.skip {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 900;
+}
+.list-card {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #6366f1, #3b82f6);
+  font-weight: 900;
+}
+.list-title, .card-title {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+}
+.list-copy, .card-copy {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 3px;
+}
+.time {
+  color: var(--subdued);
+  font-size: 11px;
+  font-weight: 800;
+}
+.unread {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--violet);
+  margin-left: auto;
+  margin-top: 8px;
+}
+.search-stack { display: flex; flex-direction: column; gap: 12px; }
+.option-card {
+  min-height: 142px;
+  border-radius: 24px;
+  border: 1px solid rgba(99,102,241,.4);
+  padding: 18px;
+  background: linear-gradient(145deg, #17172c, #111118);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.radar {
+  height: 238px;
+  border-radius: 28px;
+  border: 1px solid rgba(99,102,241,.34);
+  background:
+    radial-gradient(circle, rgba(99,102,241,.16) 0 18%, transparent 19% 34%, rgba(99,102,241,.11) 35% 36%, transparent 37%),
+    #121222;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.radar::after {
+  content: "";
+  position: absolute;
+  width: 52%;
+  height: 52%;
+  background: conic-gradient(from 60deg, rgba(99,102,241,.42), transparent 42%);
+  border-radius: 50%;
+}
+.radar-core {
+  position: relative;
+  z-index: 1;
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: var(--violet);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  box-shadow: 0 0 36px rgba(99,102,241,.52);
+}
+.match-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(59,130,246,.24), rgba(19,19,26,.95));
+}
+.avatar-cluster {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 18px;
+}
+.avatar-cluster .avatar {
+  width: 74px;
+  height: 74px;
+  border: 4px solid var(--bg);
+  margin-left: -18px;
+}
+.avatar-cluster .avatar:first-child { margin-left: 0; }
+.icebreaker {
+  border-radius: 22px;
+  background: rgba(59,130,246,.14);
+  border: 1px solid rgba(59,130,246,.34);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bubble {
+  max-width: 82%;
+  border-radius: 19px;
+  padding: 10px 13px;
+  background: #262632;
+}
+.bubble.mine {
+  margin-left: auto;
+  background: var(--violet);
+}
+.sender {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+.message {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.chat-input {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  min-height: 54px;
+  border-radius: 27px;
+  background: var(--raised);
+  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 38px 1fr 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  color: var(--muted);
+}
+.send {
+  height: 42px;
+  border-radius: 50%;
+  background: var(--violet);
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 900;
+}
+.event-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(145deg, rgba(34,197,94,.12), rgba(19,19,26,.95));
+}
+.rsvp-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+.rsvp {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 900;
+}
+.rsvp.active {
+  border-color: var(--green);
+  color: #b9ffd1;
+  background: rgba(34,197,94,.13);
+}
+.bottom-nav {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 24px;
+}
+.nav-pills {
+  height: 52px;
+  border-radius: 999px;
+  background: var(--text);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  padding: 5px;
+  gap: 4px;
+}
+.nav-pill {
+  height: 42px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #555663;
+  font-size: 11px;
+  font-weight: 900;
+}
+.nav-pill.active {
+  background: var(--violet);
+  color: white;
+}
+.profile-card {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.stat {
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 14px 8px;
+  text-align: center;
+}
+.stat strong { display: block; font-size: 20px; }
+.stat span { color: var(--muted); font-size: 10px; font-weight: 900; }
+@media (max-width: 760px) {
+  body { padding: 14px; }
+  .intro { display: block; }
+  .intro p { margin-top: 10px; }
+}
+</style>
+</head>
+<body>
+  <header class="intro">
+    <div>
+      <div class="screen-label">Pre-implementation markup</div>
+      <h1>InterestMatch v2 app UI</h1>
+    </div>
+    <p>
+      This is the React Native implementation target I would build from the pushed UI mocks:
+      the v2 dark card system, real functional app screens, AI matching, events, chat, and profile.
+    </p>
+  </header>
+
+  <main class="storyboard">
+    <section class="phone">
+      <div class="phone-content">
+        <div class="screen-label">01 - Interests home</div>
+        <div class="topbar">
+          <div class="logo">IM</div>
+          <div class="icon-row">
+            <div class="icon">S</div>
+            <div class="icon">N<span class="badge-dot"></span></div>
+          </div>
+        </div>
+        <h2>Find your people</h2>
+        <p class="subtitle">Pick a category or jump back into a group that is already moving.</p>
+        <div class="section">
+          <article class="hero-card">
+            <h3>Gaming crews</h3>
+            <p>FPS, co-op chaos, story mode, ranked nights.</p>
+          </article>
+          <div class="category-grid">
+            <article class="category-card films"><h3>Films</h3><p>Late-night movie taste.</p></article>
+            <article class="category-card music"><h3>Music</h3><p>Tracks, artists, scenes.</p></article>
+            <article class="category-card sports"><h3>Sports</h3><p>Play, watch, meet.</p></article>
+            <article class="category-card gaming"><h3>Gaming</h3><p>Squads and servers.</p></article>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="fab">+</div>
+        <div class="nav-pills">
+          <div class="nav-pill active">Interests</div>
+          <div class="nav-pill">Events</div>
+          <div class="nav-pill">Matches</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phone">
+      <div class="phone-content">
+        <div class="screen-label">02 - Category profile</div>
+        <div class="topbar">
+          <div class="logo">&lt;</div>
+          <div class="icon-row"><div class="icon">S</div><div class="icon">N</div></div>
+        </div>
+        <h2>Build your gaming signal</h2>
+        <p class="subtitle">Every question is skippable. Selected chips and skipped fields map cleanly into the existing interest profile data.</p>
+        <div class="section">
+          <article class="question-card">
+            <div class="row"><span class="small-label">Favorite genres</span><span class="skip">Skip</span></div>
+            <div class="chips">
+              <span class="chip active">FPS</span><span class="chip">RPG</span><span class="chip active">Co-op</span><span class="chip">Cozy</span>
+            </div>
+          </article>
+          <article class="question-card">
+            <div class="row"><span class="small-label">Recently played</span><span class="skip">Skip</span></div>
+            <div class="input textarea">Baldur's Gate 3, Valorant, a little Stardew after midnight...</div>
+          </article>
+          <article class="question-card">
+            <div class="row"><span class="small-label">Shame card</span><span class="skip">Unskip</span></div>
+            <div class="input">The game you are weirdly bad at</div>
+          </article>
+          <div class="btn">Find my gaming people</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phone">
+      <div class="phone-content">
+        <div class="screen-label">03 - Discover and AI matching</div>
+        <div class="topbar">
+          <div class="logo">IM</div>
+          <div class="icon-row"><div class="icon">S</div><div class="icon">N</div></div>
+        </div>
+        <h2>Describe the vibe</h2>
+        <p class="subtitle">Preserves the current search-groups and match-users flows, with cards matching the v2 aesthetic.</p>
+        <div class="search-stack">
+          <div class="input textarea">quiet film nerds who like sci-fi, low pressure chats, and weekend plans</div>
+          <div class="btn">Search groups</div>
+          <article class="option-card">
+            <div>
+              <div class="card-title">Midnight Sci-Fi Club</div>
+              <p class="card-copy">Four people comparing strange endings and underrated directors.</p>
+            </div>
+            <div class="chips"><span class="chip active">Sci-fi</span><span class="chip">Slow burn</span><span class="chip">Meetups</span></div>
+          </article>
+          <article class="option-card">
+            <div>
+              <div class="card-title">Weekend Watchlist</div>
+              <p class="card-copy">A small group that picks one film and one discussion prompt per week.</p>
+            </div>
+            <div class="chips"><span class="chip active">Films</span><span class="chip">Casual</span></div>
+          </article>
+          <div class="btn">Let AI find my group</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phone">
+      <div class="phone-content">
+        <div class="screen-label">04 - Matching and match found</div>
+        <div class="topbar">
+          <div class="logo">IM</div>
+          <div class="icon-row"><div class="icon">S</div><div class="icon">N</div></div>
+        </div>
+        <h2>Group assembled</h2>
+        <p class="subtitle">This becomes the post-match route before opening the live chat.</p>
+        <div class="radar"><div class="radar-core">AI</div></div>
+        <div class="avatar-cluster">
+          <div class="avatar">J</div><div class="avatar">S</div><div class="avatar">K</div><div class="avatar">YOU</div>
+        </div>
+        <article class="match-card">
+          <div class="small-label">Why this works</div>
+          <div class="card-title">Shared co-op taste, compatible pacing, and similar chat energy.</div>
+          <p class="card-copy">The existing match explanation route can surface these AI signals before the user enters chat.</p>
+        </article>
+        <div style="height:12px"></div>
+        <div class="btn">Join group chat</div>
+      </div>
+    </section>
+
+    <section class="phone">
+      <div class="phone-content">
+        <div class="screen-label">05 - Groups list</div>
+        <div class="topbar">
+          <div class="logo">IM</div>
+          <div class="icon-row"><div class="icon">S</div><div class="icon">N</div></div>
+        </div>
+        <h2>Your groups</h2>
+        <p class="subtitle">Realtime group list with unread state, latest message, member count, and the existing discover action.</p>
+        <div class="section">
+          <article class="list-card">
+            <div class="avatar">FC</div>
+            <div>
+              <div class="list-title">FPS Crew #42</div>
+              <p class="list-copy">Co-op nights, ranked losses, and weekend game plans.</p>
+              <p class="list-copy">Jordan: I have a take about open-world maps...</p>
+            </div>
+            <div><div class="time">10:24</div><div class="unread"></div></div>
+          </article>
+          <article class="list-card">
+            <div class="avatar">MW</div>
+            <div>
+              <div class="list-title">Midnight Watchlist</div>
+              <p class="list-copy">Slow films, intense endings, spoiler-safe prompts.</p>
+              <p class="list-copy">AI: Start with your most defended bad movie.</p>
+            </div>
+            <div><div class="time">Mon</div></div>
+          </article>
+          <article class="list-card">
+            <div class="avatar">PS</div>
+            <div>
+              <div class="list-title">Pickup Sports</div>
+              <p class="list-copy">Casual events, polls, and small local meetups.</p>
+              <p class="list-copy">Maya created a Saturday plan.</p>
+            </div>
+            <div><div class="time">May 18</div></div>
+          </article>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="fab">+</div>
+        <div class="nav-pills">
+          <div class="nav-pill">Interests</div>
+          <div class="nav-pill">Events</div>
+          <div class="nav-pill active">Matches</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phone">
+      <div class="phone-content">
+        <div class="screen-label">06 - Group chat</div>
+        <div class="topbar">
+          <div class="logo">&lt;</div>
+          <div>
+            <div class="card-title">FPS Crew #42</div>
+            <div class="card-copy">Jordan, Sasha, Kai, you</div>
+          </div>
+          <div class="icon">...</div>
+        </div>
+        <article class="icebreaker">
+          <div class="small-label">AI icebreaker</div>
+          <p class="message">Everyone here has one comfort game and one competitive game. Which one gets your loyalty?</p>
+        </article>
+        <article class="event-card">
+          <div class="row"><div class="card-title">Saturday co-op night</div><span class="time">Sat 8:00</span></div>
+          <p class="card-copy">RSVPs stay wired to the current events table and realtime refresh.</p>
+          <div class="rsvp-row"><div class="rsvp active">Going 2</div><div class="rsvp">Maybe 1</div><div class="rsvp">Pass 0</div></div>
+        </article>
+        <div class="chat">
+          <div class="bubble"><div class="sender">Jordan</div><p class="message">I respect anyone who admits they still play tutorials twice.</p></div>
+          <div class="bubble"><div class="sender">Sasha</div><p class="message">That depends. Are we counting inventory management as a boss fight?</p></div>
+          <div class="bubble mine"><p class="message">Absolutely. My backpack has defeated me more than any final boss.</p></div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <div class="icon">+</div>
+        <div>Message...</div>
+        <div class="send">^</div>
+      </div>
+    </section>
+
+    <section class="phone">
+      <div class="phone-content">
+        <div class="screen-label">07 - Events</div>
+        <div class="topbar">
+          <div class="logo">IM</div>
+          <div class="icon-row"><div class="icon">S</div><div class="icon">N</div></div>
+        </div>
+        <h2>Plans and challenges</h2>
+        <p class="subtitle">Port the new v2 events feed, then connect group events, create-event flow, and RSVP counts.</p>
+        <div class="section">
+          <div class="chips"><span class="chip active">All</span><span class="chip">Challenges</span><span class="chip">Meetups</span></div>
+          <article class="event-card">
+            <div class="small-label">Challenge</div>
+            <div class="card-title">Watch outside your comfort zone</div>
+            <p class="card-copy">Groups complete the prompt together and share one final take.</p>
+            <div class="btn">View challenge</div>
+          </article>
+          <article class="event-card">
+            <div class="small-label">Group plan</div>
+            <div class="card-title">FPS Crew co-op night</div>
+            <p class="card-copy">Sat, 8:00 PM - 2 going, 1 maybe.</p>
+            <div class="rsvp-row"><div class="rsvp active">Going</div><div class="rsvp">Maybe</div><div class="rsvp">Pass</div></div>
+          </article>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="fab">+</div>
+        <div class="nav-pills">
+          <div class="nav-pill">Interests</div>
+          <div class="nav-pill active">Events</div>
+          <div class="nav-pill">Matches</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phone">
+      <div class="phone-content">
+        <div class="screen-label">08 - Profile</div>
+        <div class="topbar">
+          <div class="logo">IM</div>
+          <div class="icon-row"><div class="icon">S</div><div class="icon">N</div></div>
+        </div>
+        <h2>Your signal</h2>
+        <p class="subtitle">Uses the current profile data, but makes films and gaming summaries feel like part of the same v2 system.</p>
+        <div class="section">
+          <article class="profile-card">
+            <div class="avatar">MS</div>
+            <div>
+              <div class="card-title">manuel_s</div>
+              <p class="card-copy">Films + Gaming profile active</p>
+            </div>
+          </article>
+          <div class="stats">
+            <div class="stat"><strong>2</strong><span>Signals</span></div>
+            <div class="stat"><strong>4</strong><span>Groups</span></div>
+            <div class="stat"><strong>9</strong><span>Plans</span></div>
+          </div>
+          <article class="question-card">
+            <div class="row"><span class="card-title">Film taste</span><span class="chip active">Films</span></div>
+            <div class="chips"><span class="chip">Arrival</span><span class="chip">Her</span><span class="chip">Dune</span></div>
+            <p class="card-copy">Actor: Oscar Isaac - Director: Denis Villeneuve - Not your thing: lazy remakes</p>
+          </article>
+          <article class="question-card">
+            <div class="row"><span class="card-title">Gaming taste</span><span class="chip active">Gaming</span></div>
+            <div class="chips"><span class="chip">Valorant</span><span class="chip">BG3</span><span class="chip">Co-op</span></div>
+            <p class="card-copy">Recently played and shame-card fields stay editable through onboarding.</p>
+          </article>
+          <div class="btn secondary-btn">Sign out</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

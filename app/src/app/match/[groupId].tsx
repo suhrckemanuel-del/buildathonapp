@@ -12,6 +12,7 @@ import {
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { AvatarCircle } from '@/components/AvatarCircle';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { AppHeader, AvatarStack } from '@/components/v2';
 import { colors, radii } from '@/components/theme';
 import { getDemoMatchExplanation, isDemoSession } from '@/lib/demoAuth';
 import type { MatchExplanation, MatchSignal } from '../../../../shared/types';
@@ -97,7 +98,7 @@ export default function MatchExplanationScreen() {
         <Text style={styles.body}>
           This route is ready for backend match traces. Demo mode already provides local examples.
         </Text>
-        <PrimaryButton label="Back to groups" onPress={() => router.replace('/(tabs)' as never)} />
+        <PrimaryButton label="Back to Match" onPress={() => router.replace('/(tabs)/discover' as never)} />
       </View>
     );
   }
@@ -106,10 +107,16 @@ export default function MatchExplanationScreen() {
     <>
       <Stack.Screen options={{ title: 'Why this match', headerBackTitle: 'Back' }} />
       <ScrollView style={styles.root} contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>AI matching preview</Text>
-          <Text style={styles.title}>{explanation.group_name}</Text>
-          <Text style={styles.body}>{explanation.summary}</Text>
+        <AppHeader
+          eyebrow="Group assembled"
+          title="Match found"
+          subtitle={explanation.summary}
+        />
+
+        <View style={styles.heroCluster}>
+          <AvatarStack names={members.map((member) => member.username)} size={66} max={5} />
+          <Text style={styles.heroTitle}>{explanation.group_name}</Text>
+          <Text style={styles.body}>Your chat is ready. Start with the generated opener, then turn it into a plan.</Text>
         </View>
 
         <View style={styles.motionPanel}>
@@ -167,10 +174,10 @@ export default function MatchExplanationScreen() {
           <PrimaryButton label="Continue to chat" onPress={() => router.replace(`/chat/${groupId}`)} />
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.replace('/(tabs)' as never)}
+            onPress={() => router.replace('/(tabs)/discover' as never)}
             style={styles.secondaryAction}
           >
-            <Text style={styles.secondaryText}>Back to groups</Text>
+            <Text style={styles.secondaryText}>Back to Match</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -215,12 +222,27 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 0,
     paddingBottom: 48,
     gap: 18,
   },
   header: {
     gap: 8,
+  },
+  heroCluster: {
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: radii.xl,
+    backgroundColor: '#0f1d3d',
+    borderWidth: 1,
+    borderColor: colors.gaming + '77',
+    padding: 22,
+  },
+  heroTitle: {
+    color: colors.text,
+    fontSize: 24,
+    fontWeight: '900',
+    textAlign: 'center',
   },
   eyebrow: {
     color: colors.primary,
@@ -240,10 +262,10 @@ const styles = StyleSheet.create({
   },
   motionPanel: {
     overflow: 'hidden',
-    borderRadius: radii.lg,
+    borderRadius: radii.xl,
     borderWidth: 1,
     borderColor: '#3730a3',
-    backgroundColor: '#15152f',
+    backgroundColor: colors.surface,
     padding: 16,
     gap: 18,
   },

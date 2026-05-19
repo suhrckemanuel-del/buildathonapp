@@ -7,7 +7,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "start": "func start",
-    "dev": "npm run build && func start"
+    "dev": "npm run build && func start",
+    "seed:demo-users": "npm run build && node dist/functions/scripts/seed-demo-users.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

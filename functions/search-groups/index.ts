@@ -211,6 +211,6 @@ Output ONLY the JSON array — no prose, no code fences.`,
 
 app.http('search-groups', {
   methods: ['POST'],
-  authLevel: 'function',
+  authLevel: 'anonymous',
   handler: searchGroups,
 });

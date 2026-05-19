@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Play Store",
-    "slug": "buildathon-app",
+    "name": "Migos",
+    "slug": "migos",
     "version": "1.0.0",
-    "scheme": "buildathon-app",
+    "scheme": "migos",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -11,23 +11,23 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0f0f0f"
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.buildathon.app"
+      "bundleIdentifier": "com.migos.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0f0f0f"
+        "backgroundColor": "#000000"
       },
-      "package": "com.buildathon.app",
+      "package": "com.migos.app",
       "edgeToEdgeEnabled": true
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [

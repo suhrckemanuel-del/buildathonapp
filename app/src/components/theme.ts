@@ -1,17 +1,39 @@
 export const colors = {
-  background: '#0a0a0f',
-  surface: '#13131a',
-  surfaceRaised: '#1c1c26',
-  border: '#2a2a3a',
-  primary: '#6366f1',
-  primaryPressed: '#4f46e5',
+  background: '#000000',
+  surface: '#0f0f12',
+  surfaceRaised: '#16161c',
+  surfaceGlass: 'rgba(255,255,255,0.08)',
+  border: '#27272f',
+  primary: '#f97316',
+  primaryPressed: '#ea580c',
+  brand: '#f97316',
+  brandSoft: '#fb923c',
+  violet: '#a855f7',
   text: '#f0f0ff',
   muted: '#9ca3af',
   subdued: '#6b7280',
   success: '#22c55e',
   danger: '#f87171',
-  films: '#e53935',
+  warning: '#f59e0b',
+  films: '#ef4444',
+  music: '#d4b629',
+  sports: '#22c55e',
   gaming: '#3b82f6',
+  global: '#a855f7',
+  rotterdam: '#00873e',
+};
+
+export type CategoryKey = 'films' | 'music' | 'sports' | 'gaming' | 'global';
+
+export const categoryThemes: Record<
+  CategoryKey,
+  { label: string; icon: string; color: string; gradient: [string, string] }
+> = {
+  films: { label: 'Films', icon: '🎬', color: colors.films, gradient: ['#4a1117', '#dc2626'] },
+  music: { label: 'Music', icon: '♪', color: colors.music, gradient: ['#4c3d0b', '#a88616'] },
+  sports: { label: 'Sports', icon: '⚽', color: colors.sports, gradient: ['#063f24', '#159447'] },
+  gaming: { label: 'Gaming', icon: '🎮', color: colors.gaming, gradient: ['#0d2a5c', '#2563eb'] },
+  global: { label: 'Global', icon: '◎', color: colors.global, gradient: ['#38136b', '#9333ea'] },
 };
 
 export const radii = {
@@ -22,5 +44,12 @@ export const radii = {
   pill: 999,
 };
 
-export const accentFor = (category: 'films' | 'games') =>
-  category === 'films' ? colors.films : colors.gaming;
+export const accentFor = (category: 'films' | 'games' | CategoryKey) => {
+  if (category === 'games') return colors.gaming;
+  return categoryThemes[category as CategoryKey]?.color ?? colors.primary;
+};
+
+export const gradientFor = (category: 'films' | 'games' | CategoryKey): [string, string] => {
+  if (category === 'games') return categoryThemes.gaming.gradient;
+  return categoryThemes[category as CategoryKey]?.gradient ?? [colors.primary, colors.violet];
+};

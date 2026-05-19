@@ -150,6 +150,6 @@ export async function matchUsers(req: HttpRequest, ctx: InvocationContext): Prom
 
 app.http('match-users', {
   methods: ['POST'],
-  authLevel: 'function',
+  authLevel: 'anonymous',
   handler: matchUsers,
 });

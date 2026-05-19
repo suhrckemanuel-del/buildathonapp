@@ -1,8 +1,8 @@
 // Shared caller-identity verification for Azure Functions.
 // Every public endpoint should call verifyCaller() and use the returned
-// userId, NOT a user_id from the request body. The function key
-// (authLevel: 'function') only proves the caller has *some* valid key;
-// it does not bind the request to a specific Supabase user.
+// userId, NOT a user_id from the request body. Public browser-callable
+// functions use authLevel: 'anonymous'; this Supabase JWT check is the
+// actual user authentication boundary.
 
 import type { HttpRequest, HttpResponseInit } from '@azure/functions';
 import { createClient } from '@supabase/supabase-js';

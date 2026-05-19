@@ -15,7 +15,7 @@ export interface User {
 }
 
 // ── Interest Profile ─────────────────────────────────────────
-export type InterestCategory = 'films' | 'games'; // extend: 'sports' | 'nationality'
+export type InterestCategory = 'films' | 'games' | 'sports' | 'music';
 
 export interface FilmProfile {
   top_films: [string, string, string];   // exactly 3
@@ -32,7 +32,21 @@ export interface GamingProfile {
   shame_game: string;
 }
 
-export type InterestProfileData = FilmProfile | GamingProfile;
+export interface SportsProfile {
+  favourite_sport: string;
+  favourite_team: string;
+  play_or_watch: 'play' | 'watch' | 'both';
+  top_athletes: string[];
+}
+
+export interface MusicProfile {
+  top_artists: string[];
+  favourite_genre: string;
+  last_concert: string;
+  comfort_album: string;
+}
+
+export type InterestProfileData = FilmProfile | GamingProfile | SportsProfile | MusicProfile;
 
 export interface InterestProfile {
   id: string;

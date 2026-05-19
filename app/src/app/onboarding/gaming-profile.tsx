@@ -15,7 +15,7 @@ import { FormTextInput } from '@/components/FormTextInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { colors, radii } from '@/components/theme';
 import { api } from '@/lib/api';
-import { isDemoSession, saveDemoGamingProfile } from '@/lib/demoAuth';
+import { isDemoSession, proceedAfterProfileSave, saveDemoGamingProfile } from '@/lib/demoAuth';
 import { supabase } from '@/lib/supabase';
 import type { Json } from '@/lib/database.types';
 import type { GamingProfile } from '../../../../shared/types';
@@ -77,7 +77,8 @@ export default function GamingProfileScreen() {
 
       if (await isDemoSession()) {
         await saveDemoGamingProfile(profile);
-        router.replace('/(tabs)' as never);
+        const nextRoute = await proceedAfterProfileSave('games');
+        router.replace(nextRoute as never);
         return;
       }
 
@@ -105,7 +106,7 @@ export default function GamingProfileScreen() {
       // Fire-and-forget: populate embedding column so matching can use it
       api.embedProfile({ user_id: user.id, category: 'games' }).catch(() => {});
 
-      router.replace('/(tabs)' as never);
+      router.replace('/(tabs)/discover' as never);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong.';
       Alert.alert('Error saving profile', message);
@@ -138,7 +139,7 @@ export default function GamingProfileScreen() {
 
         <Text style={styles.title}>Your gaming taste</Text>
         <Text style={styles.subtitle}>
-          Genre, playstyle, and the one game you secretly love — that's what we match on.
+          Genre, playstyle, and the one game you secretly love power the AI match that creates your first small group.
         </Text>
 
         <Text style={styles.sectionLabel}>Your top 3 games</Text>
@@ -199,7 +200,7 @@ export default function GamingProfileScreen() {
         </View>
 
         <PrimaryButton
-          label="Find my gaming people"
+          label="Save and find my group"
           onPress={handleSubmit}
           disabled={!allFilled || saving}
           loading={saving}

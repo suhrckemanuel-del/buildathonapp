@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -13,6 +14,8 @@ import {
 } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { MessageBubble } from '@/components/MessageBubble';
+import { AvatarStack } from '@/components/v2';
+import { colors, radii } from '@/components/theme';
 import {
   DEMO_USER_ID,
   appendDemoMessage,
@@ -308,9 +311,108 @@ export default function ChatScreen() {
     );
   }
 
+  const memberNames = [groupName || 'Matched group', 'Alex', 'Mira'];
+
+  const opener = messages.find((m) => m.is_ai_opener);
+
+  const listHeader = (
+    <View style={styles.listHeader}>
+      {opener ? (
+        <View style={styles.icebreakerCard}>
+          <View style={styles.icebreakerHead}>
+            <View style={styles.botMark}>
+              <Text style={styles.botMarkText}>AI</Text>
+            </View>
+            <View style={styles.icebreakerMeta}>
+              <Text style={styles.icebreakerLabel}>AI ICEBREAKER</Text>
+              <Text style={styles.icebreakerTitle}>First question for the group</Text>
+            </View>
+          </View>
+          <Text style={styles.icebreakerText}>{opener.content}</Text>
+        </View>
+      ) : null}
+      <View style={styles.eventsStrip}>
+        <View style={styles.eventsHeader}>
+          <View style={styles.eventsTitleBlock}>
+            <Text style={styles.eventsTitle}>Plans</Text>
+            <Text numberOfLines={1} style={styles.eventsSubtitle}>
+              Turn the chat into a thing you actually do.
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => router.push(`/events/create?groupId=${groupId}` as never)}
+            hitSlop={8}
+            style={({ pressed }) => [styles.eventsAddButton, pressed && styles.pressed]}
+          >
+            <Text style={styles.eventsAdd}>+ Plan event</Text>
+          </Pressable>
+        </View>
+        {events.length === 0 ? (
+          <View style={styles.eventsEmptyBox}>
+            <Text style={styles.eventsEmptyTitle}>No plans yet</Text>
+            <Text style={styles.eventsEmpty}>
+              Start with a movie night, park walk, Discord session, or playlist swap.
+            </Text>
+          </View>
+        ) : (
+          events.slice(0, 2).map((ev) => (
+            <View key={ev.id} style={styles.eventCard}>
+              <View style={styles.eventCardHeader}>
+                <View style={styles.eventCardCopy}>
+                  <Text style={styles.eventCardTitle} numberOfLines={1}>
+                    {ev.title}
+                  </Text>
+                  <Text style={styles.eventCardDate}>{formatEventDate(ev.event_at)}</Text>
+                </View>
+                <AvatarStack names={memberNames} size={22} />
+              </View>
+              <View style={styles.rsvpRow}>
+                {(['going', 'maybe', 'not_going'] as RSVPStatus[]).map((s) => {
+                  const active = ev.rsvps.mine === s;
+                  const count = ev.rsvps[s] ?? 0;
+                  return (
+                    <Pressable
+                      key={s}
+                      onPress={() => handleRSVP(ev.id, s)}
+                      style={[styles.rsvpPill, active && styles.rsvpPillActive]}
+                    >
+                      <Text style={[styles.rsvpPillText, active && styles.rsvpPillTextActive]}>
+                        {rsvpLabel(s)} - {count}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          ))
+        )}
+      </View>
+    </View>
+  );
+
   return (
     <>
-      <Stack.Screen options={{ title: groupName || 'Chat', headerBackTitle: 'Back' }} />
+      <Stack.Screen
+        options={{
+          title: groupName || 'Chat',
+          headerBackTitle: 'Back',
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+          headerTitle: () => (
+            <View style={styles.headerTitleWrap}>
+              <Text numberOfLines={1} style={styles.headerTitleText}>
+                {groupName || 'Chat'}
+              </Text>
+              <View style={styles.headerMetaRow}>
+                <AvatarStack names={memberNames} size={18} max={3} />
+                <Text numberOfLines={1} style={styles.headerMetaText}>
+                  AI matched
+                </Text>
+              </View>
+            </View>
+          ),
+        }}
+      />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -321,77 +423,33 @@ export default function ChatScreen() {
             <ActivityIndicator color="#a78bfa" size="large" />
           </View>
         ) : (
-          <>
-            {(() => {
-              const opener = messages.find((m) => m.is_ai_opener);
-              if (!opener) return null;
-              return (
-                <View style={styles.icebreakerCard}>
-                  <Text style={styles.icebreakerLabel}>AI ICEBREAKER</Text>
-                  <Text style={styles.icebreakerText}>{opener.content}</Text>
-                </View>
-              );
-            })()}
-            <View style={styles.eventsStrip}>
-              <View style={styles.eventsHeader}>
-                <Text style={styles.eventsTitle}>Plans</Text>
-                <Pressable
-                  onPress={() => router.push(`/events/create?groupId=${groupId}` as never)}
-                  hitSlop={8}
-                >
-                  <Text style={styles.eventsAdd}>+ Plan event</Text>
-                </Pressable>
-              </View>
-              {events.length === 0 ? (
-                <Text style={styles.eventsEmpty}>No plans yet. Tap + to start one.</Text>
-              ) : (
-                events.slice(0, 2).map((ev) => (
-                  <View key={ev.id} style={styles.eventCard}>
-                    <View style={styles.eventCardHeader}>
-                      <Text style={styles.eventCardTitle} numberOfLines={1}>
-                        {ev.title}
-                      </Text>
-                      <Text style={styles.eventCardDate}>{formatEventDate(ev.event_at)}</Text>
-                    </View>
-                    <View style={styles.rsvpRow}>
-                      {(['going', 'maybe', 'not_going'] as RSVPStatus[]).map((s) => {
-                        const active = ev.rsvps.mine === s;
-                        const count = ev.rsvps[s] ?? 0;
-                        return (
-                          <Pressable
-                            key={s}
-                            onPress={() => handleRSVP(ev.id, s)}
-                            style={[styles.rsvpPill, active && styles.rsvpPillActive]}
-                          >
-                            <Text style={[styles.rsvpPillText, active && styles.rsvpPillTextActive]}>
-                              {rsvpLabel(s)} · {count}
-                            </Text>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  </View>
-                ))
-              )}
-            </View>
-            <FlatList
-              ref={flatListRef}
-              data={messages.filter((m) => !m.is_ai_opener)}
-              keyExtractor={(item) => item.id}
-              renderItem={renderItem}
-              contentContainerStyle={styles.listContent}
-              onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
-            />
-          </>
+          <FlatList
+            ref={flatListRef}
+            data={messages.filter((m) => !m.is_ai_opener)}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            ListHeaderComponent={listHeader}
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+            onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          />
         )}
 
-        <View style={styles.safetyRow}>
+        <View style={styles.bottomDock}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.safetyRow}
+        >
           <Pressable
             style={styles.safetyButton}
             onPress={() => router.push(`/match/${groupId}` as never)}
             accessibilityRole="button"
           >
-            <Text style={styles.safetyText}>Why</Text>
+            <Text style={styles.safetyText}>Why this group</Text>
           </Pressable>
           <Pressable style={styles.safetyButton} onPress={handleLeaveGroup} accessibilityRole="button">
             <Text style={styles.safetyText}>Leave</Text>
@@ -417,13 +475,13 @@ export default function ChatScreen() {
           >
             <Text style={styles.safetyText}>Block</Text>
           </Pressable>
-        </View>
+        </ScrollView>
 
         <View style={styles.inputRow}>
           <TextInput
             style={styles.input}
-            placeholder="Message..."
-            placeholderTextColor="#6b7280"
+            placeholder="Message the group..."
+            placeholderTextColor={colors.subdued}
             value={inputText}
             onChangeText={setInputText}
             multiline
@@ -446,9 +504,10 @@ export default function ChatScreen() {
             {sending ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={styles.sendButtonText}>↑</Text>
+              <Text style={styles.sendButtonText}>Send</Text>
             )}
           </Pressable>
+        </View>
         </View>
       </KeyboardAvoidingView>
     </>
@@ -463,7 +522,7 @@ function formatEventDate(value: string) {
   const d = new Date(value);
   const date = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  return `${date} · ${time}`;
+  return `${date} - ${time}`;
 }
 
 function rsvpLabel(s: RSVPStatus) {
@@ -479,29 +538,58 @@ function labelForAction(action: 'report' | 'mute' | 'block') {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#0f0f0f' },
+  flex: { flex: 1, backgroundColor: colors.background },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  listContent: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
+  headerTitleWrap: {
+    maxWidth: 220,
+    alignItems: 'center',
+    gap: 2,
+  },
+  headerTitleText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  headerMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    maxWidth: 180,
+  },
+  headerMetaText: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  list: { flex: 1 },
+  listContent: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 16, gap: 8 },
+  listHeader: { gap: 10, paddingBottom: 12, marginHorizontal: -16 },
+  bottomDock: {
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
   safetyRow: {
     flexDirection: 'row',
     gap: 8,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#111111',
-    borderTopWidth: 1,
-    borderTopColor: '#1f2937',
+    paddingTop: 8,
+    paddingBottom: 6,
+    alignItems: 'center',
   },
   safetyButton: {
-    flex: 1,
-    minHeight: 34,
-    borderRadius: 10,
+    minHeight: 32,
+    paddingHorizontal: 14,
+    borderRadius: radii.pill,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceRaised,
     alignItems: 'center',
     justifyContent: 'center',
   },
   safetyText: {
-    color: '#d1d5db',
+    color: colors.muted,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -509,133 +597,182 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 10,
-    backgroundColor: '#141414',
-    borderTopWidth: 1,
-    borderTopColor: '#1f2937',
+    paddingTop: 6,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 12,
+    backgroundColor: colors.surface,
     gap: 10,
   },
   input: {
     flex: 1,
     minHeight: 42,
     maxHeight: 120,
-    backgroundColor: '#1f2937',
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: 21,
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#f9fafb',
+    color: colors.text,
+    textAlignVertical: 'center',
   },
   sendButton: {
-    width: 42,
+    minWidth: 58,
     height: 42,
     borderRadius: 21,
-    backgroundColor: '#7c3aed',
+    backgroundColor: colors.brand,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+  },
+  sendButtonDisabled: { backgroundColor: colors.border },
+  sendButtonPressed: { opacity: 0.8 },
+  sendButtonText: { color: '#ffffff', fontSize: 13, fontWeight: '900', lineHeight: 18 },
+  icebreakerCard: {
+    marginHorizontal: 16,
+    marginTop: 10,
+    padding: 14,
+    backgroundColor: '#1a0f05',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.brand,
+    gap: 10,
+  },
+  icebreakerHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  botMark: {
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    backgroundColor: colors.brand,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sendButtonDisabled: { backgroundColor: '#374151' },
-  sendButtonPressed: { opacity: 0.8 },
-  sendButtonText: { color: '#ffffff', fontSize: 18, fontWeight: '700', lineHeight: 20 },
-  icebreakerCard: {
-    marginHorizontal: 16,
-    marginTop: 12,
-    padding: 14,
-    backgroundColor: '#1c1c26',
-    borderRadius: 16,
-    borderLeftWidth: 3,
-    borderLeftColor: '#6366f1',
-  },
+  botMarkText: { color: '#0a0a0a', fontSize: 12, fontWeight: '900' },
+  icebreakerMeta: { flex: 1, minWidth: 0 },
   icebreakerLabel: {
-    color: '#6366f1',
+    color: colors.brandSoft,
     fontWeight: '800',
     fontSize: 11,
     letterSpacing: 0.8,
-    marginBottom: 6,
   },
-  icebreakerText: { color: '#f0f0ff', fontSize: 14, lineHeight: 20 },
+  icebreakerTitle: { color: colors.text, fontSize: 13, fontWeight: '900', marginTop: 2 },
+  icebreakerText: { color: colors.text, fontSize: 15, lineHeight: 22, fontWeight: '500' },
   eventsStrip: {
     marginHorizontal: 16,
     marginTop: 10,
     padding: 12,
-    backgroundColor: '#13131a',
-    borderRadius: 14,
+    backgroundColor: colors.surface,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#2a2a3a',
+    borderColor: colors.border,
     gap: 10,
   },
   eventsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: 10,
   },
+  eventsTitleBlock: { flex: 1, minWidth: 0, gap: 2 },
   eventsTitle: {
-    color: '#f0f0ff',
+    color: colors.text,
     fontSize: 13,
     fontWeight: '800',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
+  eventsSubtitle: {
+    color: colors.subdued,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  eventsAddButton: {
+    flexShrink: 0,
+    minHeight: 32,
+    borderRadius: radii.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: colors.violet + '24',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   eventsAdd: {
-    color: '#a78bfa',
+    color: colors.violet,
     fontSize: 12,
     fontWeight: '800',
   },
+  pressed: { opacity: 0.82 },
+  eventsEmptyBox: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    gap: 4,
+  },
+  eventsEmptyTitle: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '900',
+  },
   eventsEmpty: {
-    color: '#6b7280',
+    color: colors.subdued,
     fontSize: 12,
-    fontStyle: 'italic',
+    lineHeight: 17,
   },
   eventCard: {
-    backgroundColor: '#0f0f17',
-    borderRadius: 10,
-    padding: 10,
+    backgroundColor: colors.background,
+    borderRadius: 16,
+    padding: 12,
     gap: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#7c3aed',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   eventCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 8,
   },
+  eventCardCopy: { flex: 1, minWidth: 0, gap: 3 },
   eventCardTitle: {
     flex: 1,
-    color: '#f0f0ff',
+    color: colors.text,
     fontSize: 14,
     fontWeight: '800',
   },
   eventCardDate: {
-    color: '#9ca3af',
+    color: colors.muted,
     fontSize: 11,
     fontWeight: '700',
   },
   rsvpRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 6,
   },
   rsvpPill: {
     flex: 1,
+    minWidth: 74,
     paddingVertical: 7,
     paddingHorizontal: 6,
-    borderRadius: 8,
+    borderRadius: radii.pill,
     borderWidth: 1,
-    borderColor: '#2a2a3a',
-    backgroundColor: '#0a0a0f',
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     alignItems: 'center',
   },
   rsvpPillActive: {
-    borderColor: '#7c3aed',
-    backgroundColor: '#7c3aed22',
+    borderColor: colors.violet,
+    backgroundColor: colors.violet + '24',
   },
   rsvpPillText: {
-    color: '#9ca3af',
+    color: colors.muted,
     fontSize: 11,
     fontWeight: '700',
   },
   rsvpPillTextActive: {
-    color: '#f0f0ff',
+    color: colors.text,
   },
 });

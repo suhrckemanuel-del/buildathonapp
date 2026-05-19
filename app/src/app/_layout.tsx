@@ -2,6 +2,16 @@ import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Platform, StyleSheet, View } from 'react-native';
 
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  const id = 'migos-hide-scrollbars';
+  if (!document.getElementById(id)) {
+    const s = document.createElement('style');
+    s.id = id;
+    s.textContent = `*::-webkit-scrollbar { width: 0; height: 0; display: none; } * { scrollbar-width: none; -ms-overflow-style: none; }`;
+    document.head.appendChild(s);
+  }
+}
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.outer}>
@@ -23,6 +33,7 @@ export default function RootLayout() {
           <Stack.Screen name="onboarding/film-profile" options={{ headerShown: false }} />
           <Stack.Screen name="onboarding/gaming-profile" options={{ headerShown: false }} />
           <Stack.Screen name="events/create" options={{ headerShown: false }} />
+          <Stack.Screen name="match/searching" options={{ headerShown: false }} />
           <Stack.Screen name="match/[groupId]" options={{ headerShown: false }} />
           <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
         </Stack>

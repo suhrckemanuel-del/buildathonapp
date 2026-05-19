@@ -13,10 +13,17 @@ import { router } from 'expo-router';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { FormTextInput } from '@/components/FormTextInput';
+import { MigosLogo } from '@/components/MigosLogo';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { colors } from '@/components/theme';
 import { getPostLoginRoute } from '@/lib/authFlow';
-import { enableDemoSession, isDemoSession } from '@/lib/demoAuth';
+import {
+  clearDemoSession,
+  enableDemoSession,
+  getResumeRoute,
+  isDemoSession,
+  saveDemoUsername,
+} from '@/lib/demoAuth';
 import { supabase } from '@/lib/supabase';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -35,7 +42,8 @@ export default function LoginScreen() {
     async function bootstrap() {
       try {
         if (await isDemoSession()) {
-          router.replace('/(tabs)' as never);
+          const route = await getResumeRoute();
+          router.replace(route as never);
           return;
         }
 
@@ -45,7 +53,12 @@ export default function LoginScreen() {
 
         if (user) {
           router.replace((await getPostLoginRoute(user.id)) as never);
+          return;
         }
+
+        await enableDemoSession();
+        await saveDemoUsername('demo_' + Math.random().toString(36).slice(2, 7));
+        router.replace('/onboarding/select-category' as never);
       } finally {
         if (mounted) setLoading(null);
       }
@@ -127,8 +140,11 @@ export default function LoginScreen() {
 
   async function handleDemoMode() {
     setLoading('demo');
+    await clearDemoSession();
     await enableDemoSession();
-    router.replace('/onboarding/username');
+    const autoUsername = `demo_${Math.random().toString(36).slice(2, 7)}`;
+    await saveDemoUsername(autoUsername);
+    router.replace('/onboarding/select-category' as never);
   }
 
   if (loading === 'boot') {
@@ -148,10 +164,9 @@ export default function LoginScreen() {
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>Buildathon demo</Text>
-          <Text style={styles.title}>Play Store</Text>
+          <MigosLogo size={68} />
           <Text style={styles.subtitle}>
-            Sign in, create a film profile, and jump into a matched group chat.
+            Small AI-matched group chats around films, gaming, and the rest of your tastes.
           </Text>
         </View>
 
@@ -208,10 +223,10 @@ export default function LoginScreen() {
 
         <View style={styles.demoCard}>
           <View style={styles.demoCopy}>
-            <Text style={styles.demoTitle}>Need a reliable walkthrough?</Text>
-            <Text style={styles.demoText}>
-              Demo mode stores a local profile and sample chats so you can present the flow without auth setup.
-            </Text>
+          <Text style={styles.demoTitle}>Need a reliable walkthrough?</Text>
+          <Text style={styles.demoText}>
+              Demo mode opens a seeded local walkthrough with groups, events, matching, and chat ready.
+          </Text>
           </View>
           <PrimaryButton
             label="Use demo mode"

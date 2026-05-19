@@ -10,6 +10,7 @@ import {
 import { router, useFocusEffect } from 'expo-router';
 import { GroupCard } from '@/components/GroupCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { AppHeader } from '@/components/v2';
 import { colors } from '@/components/theme';
 import { getDemoGroups, isDemoSession } from '@/lib/demoAuth';
 import { supabase } from '@/lib/supabase';
@@ -21,6 +22,7 @@ type GroupListItem = {
   memberCount: number;
   lastMessage: string | null;
   lastMessageAt: string | null;
+  category?: 'films' | 'games' | 'sports' | 'music' | 'mixed';
 };
 
 type GroupMemberRow = {
@@ -179,6 +181,8 @@ export default function GroupsScreen() {
   return (
     <View style={styles.root}>
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -188,11 +192,11 @@ export default function GroupsScreen() {
         }
         contentContainerStyle={styles.content}
       >
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>Play Store</Text>
-          <Text style={styles.title}>Your groups</Text>
-          <Text style={styles.subtitle}>Matches, open chats, and the next conversation starter.</Text>
-        </View>
+        <AppHeader
+          eyebrow="Your circles"
+          title="Groups"
+          subtitle="Small matched chats with a reason to meet, play, watch, or plan."
+        />
 
         {loading ? (
           <View style={styles.centered}>
@@ -232,6 +236,7 @@ export default function GroupsScreen() {
                 lastMessage={group.lastMessage}
                 timestamp={formatTimestamp(group.lastMessageAt)}
                 hasUnread={false}
+                category={group.category ?? inferCategoryFromId(group.id)}
                 onPress={() => router.push(`/chat/${group.id}`)}
               />
             ))}
@@ -269,6 +274,13 @@ function isMissingSession(message: string) {
   return message.toLowerCase().includes('session missing');
 }
 
+function inferCategoryFromId(id: string): 'films' | 'games' | 'sports' | 'music' | 'mixed' | undefined {
+  if (id === 'demo-fresh-match') return 'mixed';
+  if (id === 'demo-fps-crew' || id === 'demo-rpg-nerds' || id === 'demo-couch-coop') return 'games';
+  if (id === 'demo-noir' || id === 'demo-auteurs' || id === 'demo-comfort') return 'films';
+  return undefined;
+}
+
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -276,28 +288,9 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingTop: 56,
+    paddingTop: 0,
     paddingBottom: 120,
     gap: 20,
-  },
-  header: {
-    gap: 7,
-  },
-  eyebrow: {
-    color: colors.primary,
-    fontSize: 12,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-  },
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: '800',
-  },
-  subtitle: {
-    color: colors.muted,
-    fontSize: 15,
-    lineHeight: 21,
   },
   centered: {
     alignItems: 'center',

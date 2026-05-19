@@ -103,6 +103,6 @@ export async function letterboxdImport(req: HttpRequest, ctx: InvocationContext)
 
 app.http('letterboxd-import', {
   methods: ['POST'],
-  authLevel: 'function',
+  authLevel: 'anonymous',
   handler: letterboxdImport,
 });

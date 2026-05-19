@@ -14,7 +14,7 @@ import { FormTextInput } from '@/components/FormTextInput';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { colors, radii } from '@/components/theme';
 import { api } from '@/lib/api';
-import { isDemoSession, saveDemoFilmProfile } from '@/lib/demoAuth';
+import { isDemoSession, proceedAfterProfileSave, saveDemoFilmProfile } from '@/lib/demoAuth';
 import { supabase } from '@/lib/supabase';
 import type { Json } from '@/lib/database.types';
 import type { FilmProfile } from '../../../../shared/types';
@@ -98,7 +98,8 @@ export default function FilmProfileScreen() {
 
       if (await isDemoSession()) {
         await saveDemoFilmProfile(profile);
-        router.replace('/(tabs)' as never);
+        const nextRoute = await proceedAfterProfileSave('films');
+        router.replace(nextRoute as never);
         return;
       }
 
@@ -126,7 +127,7 @@ export default function FilmProfileScreen() {
       // Fire-and-forget: populate embedding column so matching can use it
       api.embedProfile({ user_id: user.id, category: 'films' }).catch(() => {});
 
-      router.replace('/(tabs)' as never);
+      router.replace('/(tabs)/discover' as never);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong.';
       Alert.alert('Error saving profile', message);
@@ -153,7 +154,9 @@ export default function FilmProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>Your film taste</Text>
-        <Text style={styles.subtitle}>Help us find people who share your passion for cinema.</Text>
+        <Text style={styles.subtitle}>
+          Your top films, actor, and director power the AI match that creates your first small group.
+        </Text>
 
         <View style={styles.letterboxdCard}>
           {!letterboxdOpen ? (
@@ -237,7 +240,7 @@ export default function FilmProfileScreen() {
         </View>
 
         <PrimaryButton
-          label="Save and continue"
+          label="Save and find my group"
           onPress={handleSubmit}
           disabled={!allFilled || saving}
           loading={saving}

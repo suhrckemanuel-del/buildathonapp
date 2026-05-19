@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 import { router } from 'expo-router';
+import { AppHeader } from '@/components/v2';
+import { colors, radii } from '@/components/theme';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api';
 import {
@@ -101,10 +103,13 @@ function PendingBanner({ match }: { match: MatchRequest }) {
   });
   return (
     <View style={styles.pendingBanner}>
-      <Text style={styles.pendingTitle}>Match in progress</Text>
+      <Text style={styles.pendingTitle}>We are still assembling your group</Text>
       <Text style={styles.pendingBody}>
         Status: <Text style={styles.pendingStatus}>{match.status}</Text>
-        {'  ·  '}expires {expiry}
+        {'  -  '}expires {expiry}
+      </Text>
+      <Text style={styles.pendingHelp}>
+        For the strongest judge demo, add both Film and Gaming tastes. More signals make it easier to form a real small group.
       </Text>
       {match.prompt_text ? (
         <Text style={styles.pendingPrompt}>"{match.prompt_text}"</Text>
@@ -207,9 +212,9 @@ export default function DiscoverScreen() {
     setMatchError(null);
     try {
       if (await isDemoSession()) {
-        const groupId = await createDemoMatchedGroup();
+        const { groupId, category } = await createDemoMatchedGroup();
         setMatchConfirmed(true);
-        router.replace(`/match/${groupId}` as never);
+        router.push(`/match/searching?groupId=${groupId}&category=${category}` as never);
         return;
       }
 
@@ -237,8 +242,8 @@ export default function DiscoverScreen() {
 
       // Direct group creation from the client is intentionally removed
       // (would let any user force arbitrary user_ids into a group). Use the
-      // "Let AI find my group" flow instead — the server side handles grouping.
-      showToast('Tap "Let AI find my group" to get matched');
+      // "Find my group" flow instead; the server side handles grouping.
+      showToast('Tap "Find my group" to get matched');
     } catch (e: unknown) {
       showToast(e instanceof Error ? e.message : 'Could not join group');
     }
@@ -252,9 +257,61 @@ export default function DiscoverScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
       >
-        {/* ── Search section ── */}
-        <Text style={styles.sectionLabel}>Find a group</Text>
+        <AppHeader
+          eyebrow="AI matching"
+          title="Find your group"
+          subtitle="Your interest profiles power the match. We assemble a small chat with an opener, not another endless feed."
+        />
+
+        {/* ── AI match section (primary) ── */}
+        {pendingMatch ? (
+          <PendingBanner match={pendingMatch} />
+        ) : matchConfirmed ? (
+          <View style={styles.confirmedBanner}>
+            <Text style={styles.confirmedText}>
+              We saved your request. Add more interest profiles if you want the highest chance of an instant group.
+            </Text>
+          </View>
+        ) : (
+          <>
+            <Pressable
+              style={({ pressed }) => [
+                styles.primaryBtn,
+                styles.aiBtn,
+                pressed && styles.btnPressed,
+                matchLoading && styles.btnDisabled,
+              ]}
+              onPress={handleAIMatch}
+              disabled={matchLoading}
+              accessibilityRole="button"
+              accessibilityLabel="Find my group"
+            >
+              {matchLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.primaryBtnText}>Find my group</Text>
+              )}
+            </Pressable>
+            {matchError ? <Text style={styles.error}>{matchError}</Text> : null}
+          </>
+        )}
+
+        <View style={styles.matchExplainer}>
+          <Text style={styles.matchExplainerTitle}>How your match is built</Text>
+          <Text style={styles.matchExplainerBody}>
+            We read your saved interest profiles — films, gaming, sports, music — find five people whose tastes overlap with yours, and write the first opener so the chat starts on something specific.
+          </Text>
+        </View>
+
+        {/* ── Search section (secondary) ── */}
+        <View style={styles.divider} />
+        <Text style={styles.sectionLabel}>Explore by vibe</Text>
+        <Text style={styles.helperCopy}>
+          Optional. Search a vibe to browse seeded groups. Real users join through AI matching above.
+        </Text>
 
         <TextInput
           style={styles.input}
@@ -270,7 +327,7 @@ export default function DiscoverScreen() {
 
         <Pressable
           style={({ pressed }) => [
-            styles.primaryBtn,
+            styles.secondaryBtn,
             pressed && styles.btnPressed,
             (searchLoading || !prompt.trim()) && styles.btnDisabled,
           ]}
@@ -280,9 +337,9 @@ export default function DiscoverScreen() {
           accessibilityLabel="Search groups"
         >
           {searchLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.text} />
           ) : (
-            <Text style={styles.primaryBtnText}>Search</Text>
+            <Text style={styles.secondaryBtnText}>Search</Text>
           )}
         </Pressable>
 
@@ -294,45 +351,6 @@ export default function DiscoverScreen() {
               <GroupCard key={opt.group.id || opt.group.name} option={opt} onJoin={handleJoin} />
             ))}
           </View>
-        )}
-
-        {/* ── AI match section ── */}
-        <View style={styles.divider} />
-        <Text style={styles.sectionLabel}>AI matching</Text>
-
-        {pendingMatch ? (
-          <PendingBanner match={pendingMatch} />
-        ) : matchConfirmed ? (
-          <View style={styles.confirmedBanner}>
-            <Text style={styles.confirmedText}>
-              We'll find your group within 3 days
-            </Text>
-          </View>
-        ) : (
-          <>
-            <Text style={styles.aiHint}>
-              Let our AI analyse your taste profile and match you with the best group.
-            </Text>
-            <Pressable
-              style={({ pressed }) => [
-                styles.primaryBtn,
-                styles.aiBtn,
-                pressed && styles.btnPressed,
-                matchLoading && styles.btnDisabled,
-              ]}
-              onPress={handleAIMatch}
-              disabled={matchLoading}
-              accessibilityRole="button"
-              accessibilityLabel="Let AI find my group"
-            >
-              {matchLoading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.primaryBtnText}>Let AI find my group</Text>
-              )}
-            </Pressable>
-            {matchError ? <Text style={styles.error}>{matchError}</Text> : null}
-          </>
         )}
       </ScrollView>
 
@@ -346,15 +364,15 @@ export default function DiscoverScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#0f0f0f',
+    backgroundColor: colors.background,
   },
   scroll: {
     flex: 1,
   },
   content: {
     paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 48,
+    paddingTop: 0,
+    paddingBottom: 140,
     gap: 12,
   },
 
@@ -362,7 +380,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6b7280',
+    color: colors.brand,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 4,
@@ -370,27 +388,50 @@ const styles = StyleSheet.create({
 
   // Search input
   input: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 14,
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
-    color: '#ffffff',
+    borderColor: colors.border,
+    color: colors.text,
     fontSize: 15,
     paddingHorizontal: 16,
     paddingVertical: 14,
     minHeight: 56,
   },
+  helperCopy: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: -6,
+  },
 
   // Buttons
   primaryBtn: {
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: '#4f46e5',
+    height: 56,
+    borderRadius: radii.pill,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  aiBtn: {
+    backgroundColor: colors.brand,
+    height: 60,
+    marginTop: 4,
+  },
+  secondaryBtn: {
+    height: 48,
+    borderRadius: radii.pill,
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  aiBtn: {
-    backgroundColor: '#7c3aed',
+  secondaryBtnText: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '700',
   },
   btnPressed: {
     opacity: 0.85,
@@ -406,7 +447,7 @@ const styles = StyleSheet.create({
 
   // Error
   error: {
-    color: '#f87171',
+    color: colors.danger,
     fontSize: 13,
     marginTop: 4,
   },
@@ -419,21 +460,21 @@ const styles = StyleSheet.create({
 
   // Card
   card: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radii.xl,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
     padding: 16,
     gap: 10,
   },
   cardName: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#ffffff',
+    color: colors.text,
   },
   cardSummary: {
     fontSize: 14,
-    color: '#9ca3af',
+    color: colors.muted,
     lineHeight: 20,
   },
   tagRow: {
@@ -442,14 +483,14 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   tag: {
-    backgroundColor: '#27272a',
+    backgroundColor: colors.surfaceRaised,
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   tagText: {
     fontSize: 12,
-    color: '#a78bfa',
+    color: colors.violet,
     fontWeight: '500',
   },
   cardMeta: {
@@ -457,12 +498,12 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: '#6b7280',
+    color: colors.subdued,
   },
   joinBtn: {
     height: 40,
-    borderRadius: 10,
-    backgroundColor: '#4f46e5',
+    borderRadius: radii.pill,
+    backgroundColor: colors.text,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
@@ -471,7 +512,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   joinBtnText: {
-    color: '#ffffff',
+    color: colors.background,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -479,7 +520,7 @@ const styles = StyleSheet.create({
   // Divider
   divider: {
     height: 1,
-    backgroundColor: '#1f1f1f',
+    backgroundColor: colors.border,
     marginVertical: 8,
   },
 
@@ -489,11 +530,29 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     lineHeight: 20,
   },
+  matchExplainer: {
+    borderRadius: radii.xl,
+    borderWidth: 1,
+    borderColor: colors.brand + '66',
+    backgroundColor: colors.brand + '18',
+    padding: 16,
+    gap: 6,
+  },
+  matchExplainerTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  matchExplainerBody: {
+    color: colors.muted,
+    fontSize: 14,
+    lineHeight: 20,
+  },
 
   // Pending banner
   pendingBanner: {
     backgroundColor: '#1a1a2e',
-    borderRadius: 14,
+    borderRadius: radii.xl,
     borderWidth: 1,
     borderColor: '#3730a3',
     padding: 16,
@@ -502,11 +561,16 @@ const styles = StyleSheet.create({
   pendingTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#a5b4fc',
+    color: '#c7d2fe',
   },
   pendingBody: {
     fontSize: 13,
     color: '#9ca3af',
+  },
+  pendingHelp: {
+    fontSize: 13,
+    color: '#c7d2fe',
+    lineHeight: 19,
   },
   pendingStatus: {
     color: '#ffffff',

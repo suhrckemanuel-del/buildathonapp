@@ -75,17 +75,21 @@ const styles = StyleSheet.create({
   },
   bubble: {
     maxWidth: '80%',
+    minWidth: 54,
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 4,
+    flexShrink: 1,
   },
   mine: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.violet,
     borderBottomRightRadius: 6,
   },
   other: {
-    backgroundColor: '#262626',
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderBottomLeftRadius: 6,
   },
   sender: {
@@ -97,6 +101,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 15,
     lineHeight: 21,
+    flexShrink: 1,
   },
   time: {
     alignSelf: 'flex-end',
