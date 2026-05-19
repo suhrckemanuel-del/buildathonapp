@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>InterestMatch — Events</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      oklch(9% 0.010 268);
+  --surface: oklch(13% 0.010 268);
+  --border:  oklch(20% 0.008 268);
+  --text:    oklch(96% 0.005 268);
+  --muted:   oklch(55% 0.005 268);
+  --accent:  oklch(62% 0.21 302);
+  --rdam:    #00873E; /* Rotterdam municipal green */
+}
+
+html, body { height: 100%; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 52px 20px 16px;
+  position: sticky; top: 0; z-index: 20;
+  background: var(--bg);
+}
+.logo-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--text); border: none;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation; cursor: pointer; flex-shrink: 0;
+}
+.header-right { display: flex; align-items: center; gap: 10px; }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: none; background: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); cursor: pointer; touch-action: manipulation;
+  position: relative;
+}
+.badge {
+  position: absolute; top: 4px; right: 3px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  background: var(--accent); border-radius: 100px;
+  font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Page head ── */
+.page-head {
+  padding: 0 20px 16px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.page-title {
+  font-size: 30px; font-weight: 800;
+  letter-spacing: -0.02em; line-height: 1.1;
+}
+
+/* ── Filter chips ── */
+.filter-row {
+  display: flex; gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1.5px solid var(--border);
+  background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--muted);
+  cursor: pointer; touch-action: manipulation;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: oklch(96% 0.005 268);
+}
+
+/* ── Feed grid ── */
+.feed {
+  flex: 1;
+  padding: 0 16px 112px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-content: start;
+}
+
+/* ── Card base ── */
+.event-card {
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  touch-action: manipulation;
+  grid-column: span 1;
+}
+.event-card.full { grid-column: 1 / -1; }
+.event-card::after {
+  content: ''; position: absolute; border-radius: 50%; pointer-events: none;
+}
+
+.card-inner {
+  position: absolute; inset: 0; padding: 18px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  pointer-events: none;
+}
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+
+/* ── Challenge cards ── */
+.challenge-card {
+  height: 210px;
+}
+.challenge-card.full { height: 220px; }
+
+.challenge-text {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px; font-weight: 800;
+  color: oklch(96% 0.005 268);
+  line-height: 1.2;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.challenge-card.full .challenge-text { font-size: 24px; }
+
+.challenge-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  pointer-events: all;
+}
+.challenge-reward {
+  font-size: 13px; font-weight: 700;
+  color: oklch(96% 0.005 268 / 0.85);
+}
+.challenge-reward span {
+  font-size: 16px; font-weight: 800;
+  color: oklch(96% 0.005 268);
+}
+
+.btn-join {
+  padding: 9px 16px;
+  border-radius: 100px; border: none;
+  background: oklch(96% 0.005 268 / 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px; font-weight: 800;
+  color: oklch(96% 0.005 268);
+  cursor: pointer; touch-action: manipulation;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-join:active { background: oklch(96% 0.005 268 / 0.28); }
+
+/* ── Meetup cards ── */
+.meetup-card { height: 172px; }
+.meetup-card.full { height: 140px; }
+
+.meetup-name {
+  font-family: 'Righteous', cursive;
+  font-size: 17px; color: oklch(96% 0.005 268);
+  line-height: 1.15; margin-bottom: 6px;
+}
+.meetup-card.full .meetup-name { font-size: 20px; }
+
+.meetup-meta {
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meetup-detail {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600;
+  color: oklch(96% 0.005 268 / 0.7);
+}
+.meetup-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  pointer-events: all;
+}
+.attendee-row {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700;
+  color: oklch(96% 0.005 268 / 0.8);
+}
+.attendee-stack { display: flex; }
+.av-xs {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid oklch(9% 0.01 268 / 0.5);
+  margin-right: -5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 800; color: white;
+}
+.btn-rsvp {
+  padding: 8px 14px;
+  border-radius: 100px; border: none;
+  background: oklch(96% 0.005 268 / 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px; font-weight: 800;
+  color: oklch(96% 0.005 268);
+  cursor: pointer; touch-action: manipulation;
+  transition: background 0.15s;
+}
+.btn-rsvp:active { background: oklch(96% 0.005 268 / 0.25); }
+.btn-rsvp.going {
+  background: oklch(96% 0.005 268 / 0.9);
+  color: oklch(12% 0.01 268);
+}
+
+/* ── Category badge ── */
+.cat-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 100px;
+  background: oklch(96% 0.005 268 / 0.12);
+  font-size: 10px; font-weight: 700;
+  color: oklch(96% 0.005 268 / 0.8);
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+/* ── Countdown ── */
+.countdown {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700;
+  color: oklch(96% 0.005 268 / 0.65);
+  letter-spacing: 0.02em;
+}
+
+/* ── Card color themes ── */
+.card-films    { background: linear-gradient(145deg, oklch(18% 0.14 14) 0%, oklch(36% 0.22 14) 100%); }
+.card-films::after    { width: 160px; height: 160px; background: oklch(57% 0.22 14 / 0.18); right: -30px; top: -30px; }
+
+.card-gaming   { background: linear-gradient(145deg, oklch(18% 0.16 252) 0%, oklch(36% 0.22 252) 100%); }
+.card-gaming::after   { width: 150px; height: 150px; background: oklch(62% 0.22 252 / 0.18); right: -25px; top: -25px; }
+
+.card-music    { background: linear-gradient(145deg, oklch(24% 0.12 95) 0%, oklch(44% 0.17 95) 100%); }
+.card-music::after    { width: 140px; height: 140px; background: oklch(78% 0.17 95 / 0.18); right: -20px; top: -20px; }
+
+.card-sports   { background: linear-gradient(145deg, oklch(18% 0.13 142) 0%, oklch(36% 0.20 142) 100%); }
+.card-sports::after   { width: 140px; height: 140px; background: oklch(66% 0.20 142 / 0.18); right: -20px; top: -20px; }
+
+.card-nations  { background: linear-gradient(145deg, oklch(22% 0.17 302) 0%, oklch(40% 0.22 302) 100%); }
+.card-nations::after  { width: 160px; height: 160px; background: oklch(62% 0.21 302 / 0.2); right: -30px; top: -30px; }
+
+/* ── Rotterdam partner banner (hero) ── */
+.partner-banner {
+  margin: 0 16px 18px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #0a6b3c 0%, #0d8a48 60%, #00a151 100%);
+  border: none;
+  padding: 18px 18px 20px;
+  min-height: 104px;
+  display: flex; align-items: center; gap: 16px;
+  position: relative; overflow: hidden;
+  cursor: pointer; touch-action: manipulation;
+  transition: transform 0.12s ease-out;
+  width: calc(100% - 32px);
+  box-shadow: 0 8px 28px rgba(0, 135, 62, 0.28);
+}
+.partner-banner:active { transform: scale(0.99); }
+.partner-banner::after {
+  content: '';
+  position: absolute;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  right: -60px; top: -70px;
+  pointer-events: none;
+}
+.partner-banner::before {
+  content: '';
+  position: absolute;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  right: 30px; bottom: -80px;
+  pointer-events: none;
+}
+.partner-mark {
+  background: white;
+  border-radius: 14px;
+  padding: 12px 14px;
+  flex-shrink: 0;
+  display: flex; align-items: center;
+  position: relative; z-index: 1;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+}
+.partner-text { display: flex; flex-direction: column; gap: 4px; position: relative; z-index: 1; flex: 1; }
+.partner-eyebrow {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+  text-transform: uppercase; color: rgba(255,255,255,0.85);
+}
+.partner-title { font-size: 15px; font-weight: 700; color: white; line-height: 1.3; }
+.partner-arrow {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  color: white; flex-shrink: 0;
+  position: relative; z-index: 1;
+}
+
+/* ── Empty state (filtered) ── */
+.empty-state {
+  grid-column: 1 / -1;
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px; font-weight: 500;
+  display: none;
+}
+.empty-state.visible { display: block; }
+.empty-state strong { display: block; font-size: 32px; margin-bottom: 8px; }
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  position: fixed; bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  padding: 10px 18px 32px;
+  background: linear-gradient(to top, var(--bg) 65%, transparent);
+  display: flex; align-items: center; gap: 12px;
+  z-index: 20;
+}
+.fab {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--text); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; touch-action: manipulation;
+  box-shadow: 0 4px 16px oklch(96% 0.005 268 / 0.2);
+}
+.nav-pill-wrap {
+  flex: 1; background: var(--surface);
+  border-radius: 100px; padding: 5px;
+  display: flex; gap: 4px;
+}
+.nav-pill {
+  flex: 1; padding: 9px 0; border-radius: 100px;
+  border: none; background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px; font-weight: 700;
+  color: var(--muted); cursor: pointer; touch-action: manipulation;
+  transition: color 0.15s ease-out;
+}
+.nav-pill.active { background: var(--accent); color: oklch(96% 0.005 268); }
+
+@keyframes _pi{from{opacity:0}to{opacity:1}}
+@keyframes _po{from{opacity:1}to{opacity:0}}
+body{animation:_pi .22s ease-out}
+body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}body.nav-out{opacity:0}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <button class="logo-btn" aria-label="Menu">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="3" fill="#0a0a12"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#0a0a12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="header-right">
+    <button class="icon-btn" aria-label="Search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Notifications, 9 unread">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+      </svg>
+      <span class="badge">9</span>
+    </button>
+  </div>
+</header>
+
+<div class="page-head">
+  <h1 class="page-title">Events</h1>
+  <div class="filter-row" role="group" aria-label="Filter events">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all')" aria-pressed="true">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+      All
+    </button>
+    <button class="filter-btn" data-filter="meetup" onclick="setFilter('meetup')" aria-pressed="false">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Meetups
+    </button>
+    <button class="filter-btn" data-filter="challenge" onclick="setFilter('challenge')" aria-pressed="false">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Challenges
+    </button>
+  </div>
+</div>
+
+<!-- ── Rotterdam city-partner banner ── -->
+<button class="partner-banner" aria-label="View Rotterdam city events" onclick="setFilter('rdam')">
+  <div class="partner-mark" aria-hidden="true">
+    <svg width="124" height="34" viewBox="0 0 200 56" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#00873E">
+        <path d="M18 12 C22 8 30 8 36 14 C32 22 24 26 16 22 C16 18 16 14 18 12 Z"/>
+        <path d="M14 28 C20 30 28 28 32 22 C30 32 22 36 14 32 Z" opacity="0.85"/>
+        <circle cx="11" cy="9" r="1.6"/>
+      </g>
+      <text x="48" y="22" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="10" font-weight="700" fill="#00873E" letter-spacing="2.4">GEMEENTE</text>
+      <text x="48" y="44" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="20" font-weight="800" fill="#00873E" letter-spacing="-0.4">Rotterdam</text>
+    </svg>
+  </div>
+  <div class="partner-text">
+    <span class="partner-eyebrow">Official city partner</span>
+    <span class="partner-title">Featured Rotterdam events this week</span>
+  </div>
+  <span class="partner-arrow" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+  </span>
+</button>
+
+<main class="feed" id="feed">
+
+  <!-- CHALLENGE: Films (featured, full width) -->
+  <div class="event-card challenge-card full card-films" data-type="challenge">
+    <div class="card-inner">
+      <div class="card-top">
+        <span class="cat-chip">🎬 Films</span>
+        <span class="countdown">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+          3 days left
+        </span>
+      </div>
+      <div>
+        <p class="challenge-text">Watch a film in a language you don't speak</p>
+        <div class="challenge-footer">
+          <span class="challenge-reward"><span>$150</span> per group</span>
+          <button class="btn-join" onclick="event.stopPropagation()">Join Challenge</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEETUP: Gaming (half width) -->
+  <div class="event-card meetup-card card-gaming" data-type="meetup">
+    <div class="card-inner">
+      <div class="card-top">
+        <span style="font-size:28px; filter: drop-shadow(0 3px 6px oklch(0% 0 0 / 0.4))">🎮</span>
+      </div>
+      <div>
+        <div class="meetup-name">FPS Friday Night</div>
+        <div class="meetup-meta">
+          <div class="meetup-detail">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Fri May 23, 8PM
+          </div>
+          <div class="meetup-detail">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/></svg>
+            Discord · Online
+          </div>
+        </div>
+        <div class="meetup-footer" style="margin-top: 8px;">
+          <div class="attendee-row">
+            <div class="attendee-stack" aria-hidden="true">
+              <div class="av-xs" style="background: oklch(50% 0.18 252);">J</div>
+              <div class="av-xs" style="background: oklch(50% 0.15 200);">S</div>
+              <div class="av-xs" style="background: oklch(50% 0.18 142);">K</div>
+            </div>
+            23
+          </div>
+          <button class="btn-rsvp" onclick="toggleRsvp(this); event.stopPropagation()">RSVP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEETUP: Music (half width) -->
+  <div class="event-card meetup-card card-music" data-type="meetup">
+    <div class="card-inner">
+      <div class="card-top">
+        <span style="font-size:28px; filter: drop-shadow(0 3px 6px oklch(0% 0 0 / 0.4))">🎵</span>
+      </div>
+      <div>
+        <div class="meetup-name">Playlist Swap</div>
+        <div class="meetup-meta">
+          <div class="meetup-detail">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Sun May 25, 7PM
+          </div>
+          <div class="meetup-detail">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/></svg>
+            Spotify · Online
+          </div>
+        </div>
+        <div class="meetup-footer" style="margin-top: 8px;">
+          <div class="attendee-row">
+            <div class="attendee-stack" aria-hidden="true">
+              <div class="av-xs" style="background: oklch(50% 0.17 95);">A</div>
+              <div class="av-xs" style="background: oklch(50% 0.15 30);">M</div>
+              <div class="av-xs" style="background: oklch(50% 0.18 302);">L</div>
+            </div>
+            31
+          </div>
+          <button class="btn-rsvp" onclick="toggleRsvp(this); event.stopPropagation()">RSVP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHALLENGE: Gaming (full width) -->
+  <div class="event-card challenge-card full card-gaming" data-type="challenge">
+    <div class="card-inner">
+      <div class="card-top">
+        <span class="cat-chip">🎮 Gaming</span>
+        <span class="countdown">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+          5 days left
+        </span>
+      </div>
+      <div>
+        <p class="challenge-text">Beat any game you've never touched before</p>
+        <div class="challenge-footer">
+          <span class="challenge-reward"><span>$200</span> per group</span>
+          <button class="btn-join" onclick="event.stopPropagation()">Join Challenge</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEETUP: Sports (full width) -->
+  <div class="event-card meetup-card full card-sports" data-type="meetup">
+    <div class="card-inner">
+      <div class="card-top">
+        <div>
+          <span style="font-size:24px; filter: drop-shadow(0 3px 6px oklch(0% 0 0 / 0.4))">⚽</span>
+        </div>
+        <div class="attendee-row" style="pointer-events: all;">
+          <div class="attendee-stack" aria-hidden="true">
+            <div class="av-xs" style="background: oklch(50% 0.18 142);">D</div>
+            <div class="av-xs" style="background: oklch(50% 0.15 30);">R</div>
+            <div class="av-xs" style="background: oklch(50% 0.18 200);">T</div>
+          </div>
+          18 going
+        </div>
+      </div>
+      <div class="meetup-footer">
+        <div>
+          <div class="meetup-name">Pickup Sports Day</div>
+          <div class="meetup-detail" style="margin-top: 4px;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Mon May 26, 11AM · City Park
+          </div>
+        </div>
+        <button class="btn-rsvp" onclick="toggleRsvp(this); event.stopPropagation()">RSVP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHALLENGE: Nationalities (half width) -->
+  <div class="event-card challenge-card card-nations" data-type="challenge">
+    <div class="card-inner">
+      <div class="card-top">
+        <span class="cat-chip" style="font-size:9px;">🌍 Global</span>
+        <span class="countdown" style="font-size:9px;">7d</span>
+      </div>
+      <div>
+        <p class="challenge-text" style="font-size:15px;">Cook a dish from a country you've never visited</p>
+        <div class="challenge-footer">
+          <span class="challenge-reward" style="font-size:11px;"><span style="font-size:14px;">$100</span></span>
+          <button class="btn-join" style="font-size:10px; padding: 7px 12px;" onclick="event.stopPropagation()">Join</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEETUP: Film Club (half width) -->
+  <div class="event-card meetup-card card-films" data-type="meetup">
+    <div class="card-inner">
+      <div class="card-top">
+        <span style="font-size:28px; filter: drop-shadow(0 3px 6px oklch(0% 0 0 / 0.4))">🎬</span>
+      </div>
+      <div>
+        <div class="meetup-name">Sci-Fi Watch Party</div>
+        <div class="meetup-meta">
+          <div class="meetup-detail">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Sat May 24, 6PM
+          </div>
+          <div class="meetup-detail">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/></svg>
+            Watch2gether
+          </div>
+        </div>
+        <div class="meetup-footer" style="margin-top: 8px;">
+          <div class="attendee-row">
+            <div class="attendee-stack" aria-hidden="true">
+              <div class="av-xs" style="background: oklch(50% 0.18 14);">P</div>
+              <div class="av-xs" style="background: oklch(50% 0.15 60);">C</div>
+            </div>
+            15
+          </div>
+          <button class="btn-rsvp" onclick="toggleRsvp(this); event.stopPropagation()">RSVP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState">
+    <strong>🎉</strong>
+    Nothing here yet — check back soon!
+  </div>
+
+</main>
+
+<nav class="bottom-nav" aria-label="Main navigation">
+  <button class="fab" aria-label="Create event">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(9% 0.01 268)" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <div class="nav-pill-wrap" role="tablist">
+    <button class="nav-pill" role="tab" aria-selected="false" onclick="navigate('v2-01-splash.html')">Interests</button>
+    <button class="nav-pill active" role="tab" aria-selected="true">Events</button>
+    <button class="nav-pill" role="tab" aria-selected="false" onclick="navigate('v2-06-matches.html')">Matches</button>
+  </div>
+</nav>
+
+<script>
+function navigate(url){
+  document.body.classList.add('nav-out');
+  setTimeout(()=>location.href=url,160);
+}
+function setFilter(type) {
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      const isActive = b.dataset.filter === type;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+
+    let visible = 0;
+    document.querySelectorAll('.event-card').forEach(c => {
+      let show;
+      if (type === 'all') show = true;
+      else if (type === 'rdam') show = c.dataset.rdam === '1';
+      else show = c.dataset.type === type;
+      c.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    document.getElementById('emptyState').classList.toggle('visible', visible === 0);
+  }
+
+  function toggleRsvp(btn) {
+    const going = btn.classList.toggle('going');
+    btn.textContent = going ? 'Going ✓' : 'RSVP';
+  }
+</script>
+
+</body>
+</html>

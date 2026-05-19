@@ -278,14 +278,19 @@ body {
 }
 .btn-join:active { opacity: 0.85; }
 
+@keyframes _pi{from{opacity:0}to{opacity:1}}
+@keyframes _po{from{opacity:1}to{opacity:0}}
+body{animation:_pi .22s ease-out}
+body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
 @media (prefers-reduced-motion: reduce) {
-  .ring, .center-dot, .avatar, .av-j, .av-s, .av-k, .spinner, .cta-card {
+  .ring, .center-dot, .avatar, .av-j, .av-s, .av-k, .spinner, .cta-card, body {
     animation: none !important;
   }
   .avatar, .av-j, .av-s, .av-k { opacity: 1; transform: scale(1) !important; }
   .av-j { transform: translateX(-50%) scale(1) !important; }
   .av-s { transform: translateY(-50%) scale(1) !important; }
   .cta-card { opacity: 1; transform: none; }
+  body.nav-out { opacity: 0; }
 }
 </style>
 </head>
@@ -364,12 +369,27 @@ body {
     <p class="cta-headline">
       <strong>3 gamers</strong> matched with your vibe
     </p>
-    <button class="btn-join" onclick="location.href='06-group-chat.html'">
+    <button class="btn-join" onclick="navigate('06-group-chat.html')">
       Join your group chat
     </button>
   </div>
 
 </main>
 
+<script>
+function navigate(url){
+  document.body.classList.add('nav-out');
+  setTimeout(()=>location.href=url,160);
+}
+document.addEventListener('click',e=>{
+  if(e.defaultPrevented)return;
+  const a=e.target.closest('a[href]');
+  if(!a)return;
+  const h=a.getAttribute('href');
+  if(!h||/^(https?:|mailto:|#)/.test(h))return;
+  e.preventDefault();
+  navigate(h);
+});
+</script>
 </body>
 </html>

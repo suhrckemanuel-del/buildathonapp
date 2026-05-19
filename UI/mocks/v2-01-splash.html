@@ -221,6 +221,19 @@ body {
   right: -20px; bottom: -20px;
 }
 
+/* Dynamically added interest cards — gradient hue tuned via inline --h custom property */
+.card-custom {
+  background: linear-gradient(145deg, oklch(20% 0.12 var(--h, 302)) 0%, oklch(40% 0.20 var(--h, 302)) 100%);
+}
+.card-custom::after {
+  width: 120px; height: 120px;
+  background: oklch(62% 0.20 var(--h, 302) / 0.2);
+  right: -20px; bottom: -20px;
+}
+@keyframes _card-pop { 0% { opacity: 0; transform: scale(0.92) translateY(8px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+.card-custom { animation: _card-pop 0.32s cubic-bezier(.32,.72,0,1); }
+@media (prefers-reduced-motion: reduce) { .card-custom { animation: none; } }
+
 /* ── Quick action btn on card ── */
 .card-action {
   width: 36px; height: 36px;
@@ -274,7 +287,7 @@ body {
   border-radius: 100px;
   border: none; background: none;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 13px; font-weight: 700;
+  font-size: 12px; font-weight: 700;
   color: var(--muted);
   cursor: pointer; touch-action: manipulation;
   transition: color 0.15s ease-out;
@@ -294,7 +307,68 @@ body {
   font-size: 18px;
 }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* ── Sheets / Backdrops ── */
+.backdrop{position:fixed;inset:0;background:oklch(0% 0 0/.58);z-index:50;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.backdrop.open{opacity:1;pointer-events:all}
+.sheet{width:100%;max-width:430px;margin:0 auto;background:var(--surface);border-radius:24px 24px 0 0;padding:12px 20px 48px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:88dvh;overflow-y:auto}
+.backdrop.open .sheet{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 20px}
+.sheet-title{font-family:'Righteous',cursive;font-size:20px;color:var(--text);margin-bottom:4px}
+.sheet-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.btn-sheet-cta{width:100%;padding:16px 0;border-radius:100px;border:none;background:oklch(62% 0.21 302);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:white;cursor:pointer;touch-action:manipulation;margin-top:8px}
+
+/* ── Interest tiles ── */
+.interest-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.interest-tile{border-radius:18px;padding:14px 16px;border:1.5px solid var(--border);background:none;text-align:left;cursor:pointer;touch-action:manipulation;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:6px;width:100%}
+.interest-tile.added{border-color:oklch(62% 0.21 302);background:oklch(62% 0.21 302/.12)}
+.i-emoji{font-size:26px;line-height:1}
+.i-name{font-family:'Righteous',cursive;font-size:15px;color:var(--text)}
+.i-name-added{color:oklch(62% 0.21 302)}
+.i-count{font-size:11px;color:var(--muted);font-weight:600}
+.interest-tile.added .i-name{color:oklch(62% 0.21 302)}
+
+/* ── Notifications ── */
+.notif-list{display:flex;flex-direction:column}
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:oklch(62% 0.21 302);flex-shrink:0;margin-top:5px}
+.notif-dot.read{background:transparent;border:1.5px solid var(--border)}
+.notif-body{flex:1}
+.notif-text{font-size:13.5px;color:var(--text);line-height:1.5}
+.notif-text strong{font-weight:700}
+.notif-time{font-size:11px;color:var(--muted);margin-top:2px;display:block}
+
+/* ── Settings ── */
+.settings-slabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;padding-top:12px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;touch-action:manipulation}
+.settings-row-l{display:flex;align-items:center;gap:12px}
+.settings-icon{width:34px;height:34px;border-radius:10px;background:var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.settings-name{font-size:15px;color:var(--text);font-weight:500}
+.s-arrow{color:var(--muted)}
+.toggle{width:44px;height:26px;border-radius:99px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .2s;touch-action:manipulation;flex-shrink:0}
+.toggle.on{background:oklch(62% 0.21 302)}
+.toggle::after{content:'';width:20px;height:20px;border-radius:50%;background:white;position:absolute;top:3px;left:3px;transition:transform .2s}
+.toggle.on::after{transform:translateX(18px)}
+
+/* ── Search ── */
+.search-overlay{position:fixed;inset:0;background:var(--bg);z-index:60;padding:52px 20px 20px;display:flex;flex-direction:column;gap:20px;opacity:0;transform:translateY(-12px);transition:opacity .22s ease,transform .22s ease;pointer-events:none}
+.search-overlay.open{opacity:1;transform:translateY(0);pointer-events:all}
+.search-bar{display:flex;align-items:center;gap:12px}
+.search-input-wrap{flex:1;position:relative}
+.search-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:13px 20px 13px 44px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .15s;-webkit-appearance:none}
+.search-input:focus{border-color:oklch(62% 0.21 302)}
+.search-input::placeholder{color:var(--muted)}
+.search-icon-pos{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search-cancel{font-size:14px;font-weight:700;color:oklch(62% 0.21 302);background:none;border:none;cursor:pointer;touch-action:manipulation;white-space:nowrap;padding:0}
+.search-slabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.search-chips{display:flex;flex-wrap:wrap;gap:8px}
+.search-chip{padding:8px 16px;border-radius:100px;border:1.5px solid var(--border);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;touch-action:manipulation}
+
+@keyframes _pi{from{opacity:0}to{opacity:1}}
+@keyframes _po{from{opacity:1}to{opacity:0}}
+body{animation:_pi .22s ease-out}
+body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}body.nav-out{opacity:0}}
 </style>
 </head>
 <body>
@@ -424,6 +498,9 @@ body {
     </a>
   </div>
 
+  <!-- Dynamically populated from the Add Interest sheet -->
+  <div class="card-grid" id="customGrid"></div>
+
 </main>
 
 <nav class="bottom-nav" aria-label="Main navigation">
@@ -432,13 +509,201 @@ body {
   </button>
   <div class="nav-pill-wrap" role="tablist">
     <button class="nav-pill active" role="tab" aria-selected="true">Interests</button>
-    <button class="nav-pill" role="tab" aria-selected="false" onclick="location.href='05-matching.html'">Matches</button>
-  </div>
-  <div class="nav-profile-stack" aria-hidden="true">
-    <div class="nav-av" style="background: linear-gradient(135deg, oklch(45% 0.18 200), oklch(38% 0.14 200));">😊</div>
-    <div class="nav-av" style="background: linear-gradient(135deg, oklch(45% 0.18 30), oklch(38% 0.14 30));">😎</div>
+    <button class="nav-pill" role="tab" aria-selected="false" onclick="navigate('v2-04-events.html')">Events</button>
+    <button class="nav-pill" role="tab" aria-selected="false" onclick="navigate('v2-06-matches.html')">Matches</button>
   </div>
 </nav>
 
+<!-- ── Add Interest Sheet ── -->
+<div class="backdrop" id="interestBackdrop">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Explore more</div>
+    <p class="sheet-sub">Tap to add interests to your feed</p>
+    <div class="interest-grid">
+      <button class="interest-tile" data-key="travel"       onclick="toggleInterest(this)"><span class="i-emoji">✈️</span><span class="i-name">Travel</span><span class="i-count">8.2K members</span></button>
+      <button class="interest-tile" data-key="food"         onclick="toggleInterest(this)"><span class="i-emoji">🍕</span><span class="i-name">Food</span><span class="i-count">6.7K members</span></button>
+      <button class="interest-tile added" data-key="art"    onclick="toggleInterest(this)"><span class="i-emoji">🎨</span><span class="i-name">Art</span><span class="i-count">4.3K members</span></button>
+      <button class="interest-tile" data-key="books"        onclick="toggleInterest(this)"><span class="i-emoji">📚</span><span class="i-name">Books</span><span class="i-count">5.1K members</span></button>
+      <button class="interest-tile" data-key="tech"         onclick="toggleInterest(this)"><span class="i-emoji">💻</span><span class="i-name">Tech</span><span class="i-count">11.2K members</span></button>
+      <button class="interest-tile" data-key="fitness"      onclick="toggleInterest(this)"><span class="i-emoji">💪</span><span class="i-name">Fitness</span><span class="i-count">7.8K members</span></button>
+      <button class="interest-tile" data-key="photography"  onclick="toggleInterest(this)"><span class="i-emoji">📸</span><span class="i-name">Photography</span><span class="i-count">3.9K members</span></button>
+      <button class="interest-tile" data-key="cooking"      onclick="toggleInterest(this)"><span class="i-emoji">🍳</span><span class="i-name">Cooking</span><span class="i-count">2.4K members</span></button>
+    </div>
+    <button class="btn-sheet-cta" onclick="applyInterests()">Done</button>
+  </div>
+</div>
+
+<!-- ── Notifications Sheet ── -->
+<div class="backdrop" id="notifBackdrop">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Notifications</div>
+    <div class="notif-list">
+      <div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><p class="notif-text"><strong>FPS Crew #42</strong> — Jordan: "I mash buttons and somehow lose to CPU on easy 💀"</p><span class="notif-time">2 min ago</span></div></div>
+      <div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><p class="notif-text">You've been <strong>matched with 3 gamers!</strong> Your group is ready to chat.</p><span class="notif-time">8 min ago</span></div></div>
+      <div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><p class="notif-text"><strong>New Challenge:</strong> Watch a film in a language you don't speak — $150 reward per group</p><span class="notif-time">1 hr ago</span></div></div>
+      <div class="notif-item"><div class="notif-dot read"></div><div class="notif-body"><p class="notif-text"><strong>Playlist Swap</strong> meetup is tomorrow — Sat May 24, 6PM on Watch2gether</p><span class="notif-time">3 hr ago</span></div></div>
+      <div class="notif-item"><div class="notif-dot read"></div><div class="notif-body"><p class="notif-text"><strong>Sasha</strong> reacted 🔥 to your message in FPS Crew #42</p><span class="notif-time">5 hr ago</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Sheet ── -->
+<div class="backdrop" id="settingsBackdrop">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Settings</div>
+
+    <div class="settings-slabel">Account</div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="settings-name">Edit Profile</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="settings-name">Privacy</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+
+    <div class="settings-slabel">Preferences</div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><span class="settings-name">Push Notifications</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><span class="settings-name">Sounds</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+
+    <div class="settings-slabel">Other</div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg></div><span class="settings-name">Help &amp; Support</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+    <div class="settings-row" style="border-bottom:none"><div class="settings-row-l"><div class="settings-icon" style="background:oklch(57% 0.22 14/.15)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(57% 0.22 14)" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><span class="settings-name" style="color:oklch(57% 0.22 14)">Sign Out</span></div></div>
+  </div>
+</div>
+
+<!-- ── Search Overlay ── -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-bar">
+    <div class="search-input-wrap">
+      <svg class="search-icon-pos" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input class="search-input" id="searchInput" type="search" placeholder="Search interests, people…" autocomplete="off">
+    </div>
+    <button class="search-cancel" onclick="closeSearch()">Cancel</button>
+  </div>
+  <div>
+    <div class="search-slabel">Recent</div>
+    <div class="search-chips">
+      <button class="search-chip">Gaming</button>
+      <button class="search-chip">FPS</button>
+      <button class="search-chip">Nationalities</button>
+      <button class="search-chip">Sci-Fi</button>
+    </div>
+  </div>
+  <div>
+    <div class="search-slabel">Trending</div>
+    <div class="search-chips">
+      <button class="search-chip">🎬 Sci-Fi Films</button>
+      <button class="search-chip">⚽ Sports</button>
+      <button class="search-chip">🎵 Indie</button>
+      <button class="search-chip">✈️ Travel</button>
+      <button class="search-chip">🍕 Food</button>
+      <button class="search-chip">💻 Tech</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function navigate(url){
+  document.body.classList.add('nav-out');
+  setTimeout(()=>location.href=url,160);
+}
+document.addEventListener('click',e=>{
+  if(e.defaultPrevented)return;
+  const a=e.target.closest('a[href]');
+  if(!a)return;
+  const h=a.getAttribute('href');
+  if(!h||/^(https?:|mailto:|#)/.test(h))return;
+  e.preventDefault();
+  navigate(h);
+});
+
+// ── Sheet helpers ──
+function openSheet(id){document.getElementById(id).classList.add('open')}
+function closeSheet(id){document.getElementById(id).classList.remove('open')}
+
+// Each tile in the Add Interest sheet maps to a card we can render on the dashboard.
+// Hue values target the same OKLCH palette the built-in category cards use, so the
+// generated cards visually belong on the same feed.
+const INTEREST_CATALOG = {
+  'Travel':      { emoji: '✈️', members: '8.2K', hue: 220 },
+  'Food':        { emoji: '🍕', members: '6.7K', hue: 30 },
+  'Art':         { emoji: '🎨', members: '4.3K', hue: 320 },
+  'Books':       { emoji: '📚', members: '5.1K', hue: 60 },
+  'Tech':        { emoji: '💻', members: '11.2K', hue: 240 },
+  'Fitness':     { emoji: '💪', members: '7.8K', hue: 130 },
+  'Photography': { emoji: '📸', members: '3.9K', hue: 280 },
+  'Cooking':     { emoji: '🍳', members: '2.4K', hue: 45 },
+};
+
+function buildCustomCard(name) {
+  const data = INTEREST_CATALOG[name];
+  if (!data) return null;
+  const card = document.createElement('a');
+  card.href = '04-q-nationalities.html'; // prototype: any added interest routes to a generic bio flow
+  card.className = 'card card-sm card-custom';
+  card.dataset.interest = name;
+  card.style.setProperty('--h', data.hue);
+  card.innerHTML = `
+    <div class="card-inner">
+      <div class="card-top">
+        <span class="card-emoji">${data.emoji}</span>
+        <button class="card-action" style="width:30px;height:30px;" aria-label="Quick join" onclick="event.preventDefault()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </button>
+      </div>
+      <div class="card-bottom">
+        <div class="card-title">${name}</div>
+        <div class="card-meta">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          ${data.members}
+        </div>
+      </div>
+    </div>`;
+  return card;
+}
+
+function renderInterestOnDashboard(name) {
+  const grid = document.getElementById('customGrid');
+  if (!grid) return;
+  if (grid.querySelector(`[data-interest="${name}"]`)) return;
+  const card = buildCustomCard(name);
+  if (card) grid.appendChild(card);
+}
+
+function removeInterestFromDashboard(name) {
+  const card = document.querySelector(`#customGrid [data-interest="${name}"]`);
+  if (card) card.remove();
+}
+
+function toggleInterest(tile) {
+  const name = tile.querySelector('.i-name').textContent.trim();
+  const added = tile.classList.toggle('added');
+  if (added) renderInterestOnDashboard(name);
+  else removeInterestFromDashboard(name);
+}
+
+// Sync any tiles flagged as pre-added in the markup
+document.querySelectorAll('.interest-tile.added').forEach(t => {
+  const name = t.querySelector('.i-name').textContent.trim();
+  renderInterestOnDashboard(name);
+});
+
+function applyInterests(){closeSheet('interestBackdrop');}
+function openSearch(){
+  document.getElementById('searchOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('searchInput').focus(),240);
+}
+function closeSearch(){document.getElementById('searchOverlay').classList.remove('open')}
+
+// Close backdrop when clicking outside sheet
+document.querySelectorAll('.backdrop').forEach(b=>{
+  b.addEventListener('click',e=>{if(e.target===b)b.classList.remove('open')});
+});
+
+// Wire header + nav buttons
+document.querySelector('.logo-btn').addEventListener('click',()=>openSheet('settingsBackdrop'));
+document.querySelector('[aria-label="Search"]').addEventListener('click',openSearch);
+document.querySelector('[aria-label="Notifications, 9 unread"]').addEventListener('click',()=>openSheet('notifBackdrop'));
+document.querySelector('.fab').addEventListener('click',()=>openSheet('interestBackdrop'));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch()});
+</script>
 </body>
 </html>

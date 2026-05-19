@@ -138,9 +138,14 @@
   .send-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .send-btn svg { width: 18px; height: 18px; }
 
-  @media (prefers-reduced-motion: reduce) {
-    .typing-dot { animation: none; }
-  }
+@keyframes _pi{from{opacity:0}to{opacity:1}}
+@keyframes _po{from{opacity:1}to{opacity:0}}
+.screen{animation:_pi .22s ease-out}
+.screen.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
+@media (prefers-reduced-motion: reduce) {
+  .typing-dot, .screen { animation: none; }
+  .screen.nav-out { opacity: 0; }
+}
 </style>
 </head>
 <body>
@@ -148,7 +153,7 @@
 
   <!-- Header -->
   <div class="chat-header">
-    <a href="05-matching.html" aria-label="Back">
+    <a href="v2-05-matching.html" aria-label="Back">
       <button class="back-btn" tabindex="-1" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
@@ -246,17 +251,29 @@
 
 </main>
 <script>
-  /* Auto-resize textarea */
-  const ta = document.querySelector('.msg-input');
-  if (ta) {
-    ta.addEventListener('input', () => {
-      ta.style.height = 'auto';
-      ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
-    });
-  }
-  /* Scroll to bottom on load */
-  const msgs = document.querySelector('.messages');
-  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+function navigate(url){
+  const screen=document.querySelector('.screen');
+  screen.classList.add('nav-out');
+  setTimeout(()=>location.href=url,160);
+}
+document.addEventListener('click',e=>{
+  if(e.defaultPrevented)return;
+  const a=e.target.closest('a[href]');
+  if(!a)return;
+  const h=a.getAttribute('href');
+  if(!h||/^(https?:|mailto:|#)/.test(h))return;
+  e.preventDefault();
+  navigate(h);
+});
+const ta = document.querySelector('.msg-input');
+if (ta) {
+  ta.addEventListener('input', () => {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  });
+}
+const msgs = document.querySelector('.messages');
+if (msgs) msgs.scrollTop = msgs.scrollHeight;
 </script>
 </body>
 </html>

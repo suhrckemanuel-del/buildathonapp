@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>InterestMatch — Match Found</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      oklch(9% 0.010 268);
+  --surface: oklch(13% 0.010 268);
+  --border:  oklch(20% 0.008 268);
+  --text:    oklch(96% 0.005 268);
+  --muted:   oklch(55% 0.005 268);
+  --accent:  oklch(62% 0.22 252); /* gaming electric blue — continuity with matching screen */
+  --violet:  oklch(62% 0.21 302);
+}
+
+html, body { height: 100%; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Ambient celebratory glow */
+body::before {
+  content: '';
+  position: fixed;
+  top: -10%; left: 50%;
+  transform: translateX(-50%);
+  width: 460px; height: 460px;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(62% 0.22 252 / 0.18) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+  animation: ambient-pulse 4s ease-in-out infinite;
+}
+@keyframes ambient-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 52px 20px 16px;
+  position: sticky; top: 0; z-index: 20;
+  background: var(--bg);
+}
+.logo-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--text); border: none;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation; cursor: pointer; flex-shrink: 0;
+}
+.header-right { display: flex; align-items: center; gap: 10px; }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: none; background: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); cursor: pointer; touch-action: manipulation;
+  position: relative;
+}
+.badge {
+  position: absolute; top: 4px; right: 3px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  background: var(--violet); border-radius: 100px;
+  font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Content ── */
+.content {
+  flex: 1;
+  padding: 12px 20px 32px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Category badge ── */
+.cat-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: oklch(18% 0.16 252);
+  border: 1.5px solid oklch(36% 0.22 252 / 0.5);
+  border-radius: 100px;
+  padding: 7px 16px;
+  font-size: 13px; font-weight: 700;
+  color: var(--text);
+  align-self: flex-start;
+  cursor: pointer;
+  touch-action: manipulation;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  opacity: 0;
+  animation: fade-down 0.5s ease-out 0.05s forwards;
+  transition: transform 0.12s ease-out;
+}
+.cat-badge:active { transform: scale(0.97); }
+
+/* ── Title block ── */
+.title-block {
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  margin-top: 4px;
+  opacity: 0;
+  animation: fade-down 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s forwards;
+}
+.sparkle-row {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--accent);
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sparkle-row svg { color: var(--accent); }
+
+.title {
+  font-family: 'Righteous', sans-serif;
+  font-size: 38px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  max-width: 280px;
+}
+
+/* ── Avatars cluster ── */
+.avatars {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+  opacity: 0;
+  animation: fade-up 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+}
+.avatar {
+  width: 84px; height: 84px;
+  border-radius: 50%;
+  border: 4px solid var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 800; color: white;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  position: relative;
+  box-shadow: 0 6px 20px oklch(0% 0 0 / 0.4);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.18s ease-out, z-index 0s;
+}
+.avatar:hover, .avatar:focus-visible {
+  transform: translateY(-4px) scale(1.04);
+  z-index: 10 !important;
+  outline: none;
+}
+.avatar + .avatar { margin-left: -22px; }
+.av-1 { background: linear-gradient(135deg, oklch(60% 0.20 0), oklch(45% 0.18 0)); z-index: 4; }
+.av-2 { background: linear-gradient(135deg, oklch(62% 0.18 60), oklch(48% 0.16 60)); z-index: 3; }
+.av-3 { background: linear-gradient(135deg, oklch(58% 0.20 142), oklch(44% 0.17 142)); z-index: 2; }
+.av-4 {
+  background: oklch(20% 0.04 252);
+  border: 4px solid var(--bg);
+  color: var(--accent);
+  font-size: 18px;
+  z-index: 1;
+}
+.avatar.pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  animation: avatar-pulse 2.4s ease-out infinite;
+}
+@keyframes avatar-pulse {
+  0%   { opacity: 0.55; transform: scale(0.9); }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+
+/* ── AI icebreaker card ── */
+.icebreaker {
+  width: 100%;
+  background: color-mix(in oklch, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in oklch, var(--accent) 35%, transparent);
+  border-radius: 22px;
+  padding: 18px 18px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+  position: relative;
+  opacity: 0;
+  animation: fade-up 0.55s ease-out 0.65s forwards;
+}
+.icebreaker::after {
+  content: '';
+  position: absolute;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: oklch(62% 0.22 252 / 0.10);
+  right: -36px; bottom: -50px;
+  pointer-events: none;
+}
+.ib-head {
+  display: flex; align-items: center; gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.ib-bot {
+  width: 36px; height: 36px;
+  border-radius: 12px;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 22px oklch(62% 0.22 252 / 0.45);
+}
+.ib-meta { display: flex; flex-direction: column; line-height: 1.2; flex: 1; }
+.ib-title { font-size: 13px; font-weight: 800; color: var(--text); letter-spacing: 0.01em; }
+.ib-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.ib-regen {
+  width: 36px; height: 36px;
+  border-radius: 12px;
+  background: oklch(62% 0.22 252 / 0.18);
+  border: 1px solid oklch(62% 0.22 252 / 0.35);
+  color: var(--accent);
+  cursor: pointer; touch-action: manipulation;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease-out, background 0.15s;
+  position: relative; z-index: 1;
+}
+.ib-regen:hover { background: oklch(62% 0.22 252 / 0.28); }
+.ib-regen:active { transform: scale(0.92); }
+.ib-regen.spinning svg { animation: spin-icon 0.65s ease-in-out; }
+@keyframes spin-icon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.ib-question {
+  font-size: 17px; font-weight: 600; line-height: 1.35;
+  color: var(--text);
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Actions ── */
+.actions {
+  width: 100%;
+  display: flex; flex-direction: column; gap: 12px;
+  margin-top: 4px;
+  opacity: 0;
+  animation: fade-up 0.5s ease-out 0.85s forwards;
+}
+.btn-primary {
+  width: 100%; padding: 17px 0;
+  border-radius: 100px; border: none;
+  background: var(--accent);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px; font-weight: 800;
+  color: oklch(12% 0.04 252);
+  cursor: pointer; touch-action: manipulation;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform 0.12s ease-out, opacity 0.15s ease-out;
+  box-shadow: 0 10px 30px oklch(62% 0.22 252 / 0.35);
+  letter-spacing: 0.01em;
+}
+.btn-primary:active { transform: scale(0.985); opacity: 0.92; }
+
+.btn-secondary {
+  width: 100%; padding: 15px 0;
+  border-radius: 100px;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--muted);
+  cursor: pointer; touch-action: manipulation;
+  transition: color 0.15s ease-out, border-color 0.15s ease-out;
+}
+.btn-secondary:active { color: var(--text); border-color: var(--muted); }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Sheets / Backdrops (ported from v2-01-splash) ── */
+.backdrop{position:fixed;inset:0;background:oklch(0% 0 0/.58);z-index:50;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.backdrop.open{opacity:1;pointer-events:all}
+.sheet{width:100%;max-width:430px;margin:0 auto;background:var(--surface);border-radius:24px 24px 0 0;padding:12px 20px 48px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:88dvh;overflow-y:auto}
+.backdrop.open .sheet{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 20px}
+.sheet-title{font-family:'Righteous',cursive;font-size:20px;color:var(--text);margin-bottom:4px}
+.sheet-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.btn-sheet-cta{width:100%;padding:16px 0;border-radius:100px;border:none;background:oklch(62% 0.21 302);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:white;cursor:pointer;touch-action:manipulation;margin-top:8px}
+
+/* Notifications */
+.notif-list{display:flex;flex-direction:column}
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:oklch(62% 0.21 302);flex-shrink:0;margin-top:5px}
+.notif-dot.read{background:transparent;border:1.5px solid var(--border)}
+.notif-body{flex:1}
+.notif-text{font-size:13.5px;color:var(--text);line-height:1.5}
+.notif-text strong{font-weight:700}
+.notif-time{font-size:11px;color:var(--muted);margin-top:2px;display:block}
+
+/* Settings */
+.settings-slabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;padding-top:12px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;touch-action:manipulation}
+.settings-row-l{display:flex;align-items:center;gap:12px}
+.settings-icon{width:34px;height:34px;border-radius:10px;background:var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.settings-name{font-size:15px;color:var(--text);font-weight:500}
+.s-arrow{color:var(--muted)}
+.toggle{width:44px;height:26px;border-radius:99px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .2s;touch-action:manipulation;flex-shrink:0}
+.toggle.on{background:oklch(62% 0.21 302)}
+.toggle::after{content:'';width:20px;height:20px;border-radius:50%;background:white;position:absolute;top:3px;left:3px;transition:transform .2s}
+.toggle.on::after{transform:translateX(18px)}
+
+/* Search */
+.search-overlay{position:fixed;inset:0;background:var(--bg);z-index:60;padding:52px 20px 20px;display:flex;flex-direction:column;gap:20px;opacity:0;transform:translateY(-12px);transition:opacity .22s ease,transform .22s ease;pointer-events:none;max-width:430px;margin:0 auto}
+.search-overlay.open{opacity:1;transform:translateY(0);pointer-events:all}
+.search-bar{display:flex;align-items:center;gap:12px}
+.search-input-wrap{flex:1;position:relative}
+.search-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:13px 20px 13px 44px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .15s;-webkit-appearance:none}
+.search-input:focus{border-color:oklch(62% 0.21 302)}
+.search-input::placeholder{color:var(--muted)}
+.search-icon-pos{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search-cancel{font-size:14px;font-weight:700;color:oklch(62% 0.21 302);background:none;border:none;cursor:pointer;touch-action:manipulation;white-space:nowrap;padding:0}
+.search-slabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.search-chips{display:flex;flex-wrap:wrap;gap:8px}
+.search-chip{padding:8px 16px;border-radius:100px;border:1.5px solid var(--border);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;touch-action:manipulation}
+
+/* Member preview sheet */
+.member-card{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.member-card:last-of-type{border-bottom:none}
+.member-av{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:white;flex-shrink:0}
+.member-info{flex:1;display:flex;flex-direction:column;gap:2px}
+.member-name{font-size:15px;font-weight:700;color:var(--text)}
+.member-bio{font-size:12.5px;color:var(--muted);line-height:1.4}
+.member-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-top:2px}
+
+/* Page transitions */
+@keyframes _pi { from { opacity: 0 } to { opacity: 1 } }
+@keyframes _po { from { opacity: 1 } to { opacity: 0 } }
+body { animation: _pi .22s ease-out; }
+body.nav-out { animation: _po .16s ease-in forwards; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  body, body::before,
+  .cat-badge, .title-block, .avatars, .icebreaker, .actions,
+  .avatar.pulse-ring::before {
+    animation: none !important;
+  }
+  .cat-badge, .title-block, .avatars, .icebreaker, .actions {
+    opacity: 1; transform: none;
+  }
+  body.nav-out { opacity: 0; }
+  *{transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <button class="logo-btn" aria-label="Menu">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="3" fill="#0a0a12"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#0a0a12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="header-right">
+    <button class="icon-btn" aria-label="Search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Notifications, 9 unread">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+      </svg>
+      <span class="badge">9</span>
+    </button>
+  </div>
+</header>
+
+<main class="content">
+
+  <button class="cat-badge" aria-label="Change category" onclick="navigate('v2-03-categories.html')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(62% 0.22 252)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h.01M12 12h.01M18 12h.01M9 10v4M15 10v4"/></svg>
+    Gaming
+  </button>
+
+  <!-- Title -->
+  <div class="title-block">
+    <span class="sparkle-row" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.3 6.9L21 11l-6.7 2.1L12 20l-2.3-6.9L3 11l6.7-2.1z"/></svg>
+      Group assembled
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.3 6.9L21 11l-6.7 2.1L12 20l-2.3-6.9L3 11l6.7-2.1z"/></svg>
+    </span>
+    <h1 class="title">Match Found!</h1>
+    <p class="subtitle">3 people share your vibe. Your group chat is ready.</p>
+  </div>
+
+  <!-- Avatars cluster — clickable to show member preview -->
+  <div class="avatars" aria-label="Matched group: Jordan, Sasha, Kai and you">
+    <button class="avatar av-1 pulse-ring" aria-label="View Jordan" data-member="jordan">J</button>
+    <button class="avatar av-2" aria-label="View Sasha" data-member="sasha">S</button>
+    <button class="avatar av-3" aria-label="View Kai" data-member="kai">K</button>
+    <button class="avatar av-4" aria-label="View members" data-member="all">YOU</button>
+  </div>
+
+  <!-- AI icebreaker -->
+  <article class="icebreaker" aria-labelledby="ib-title">
+    <div class="ib-head">
+      <div class="ib-bot" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="oklch(12% 0.04 252)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="7" width="18" height="13" rx="3"/>
+          <path d="M12 2v5"/>
+          <circle cx="9" cy="13" r="1.2" fill="oklch(12% 0.04 252)" stroke="none"/>
+          <circle cx="15" cy="13" r="1.2" fill="oklch(12% 0.04 252)" stroke="none"/>
+          <path d="M9 17h6"/>
+        </svg>
+      </div>
+      <div class="ib-meta">
+        <span class="ib-tag">AI icebreaker</span>
+        <span class="ib-title" id="ib-title">To get the chat going</span>
+      </div>
+      <button class="ib-regen" id="regenBtn" aria-label="Generate another icebreaker">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+      </button>
+    </div>
+    <p class="ib-question" id="ibQuestion">
+      "What's the most controversial opinion you have about open-world games?"
+    </p>
+  </article>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn-primary" onclick="navigate('06-group-chat.html')">
+      Join Group Chat
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
+    <button class="btn-secondary" onclick="navigate('v2-05-matching.html')">
+      Keep Searching
+    </button>
+  </div>
+
+</main>
+
+<!-- ── Notifications Sheet ── -->
+<div class="backdrop" id="notifBackdrop">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Notifications</div>
+    <div class="notif-list">
+      <div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><p class="notif-text">You've been <strong>matched with 3 gamers!</strong> Your group is ready to chat.</p><span class="notif-time">Just now</span></div></div>
+      <div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><p class="notif-text"><strong>FPS Crew #42</strong> — Jordan: "I mash buttons and somehow lose to CPU on easy 💀"</p><span class="notif-time">2 min ago</span></div></div>
+      <div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><p class="notif-text"><strong>New Challenge:</strong> Watch a film in a language you don't speak — $150 reward per group</p><span class="notif-time">1 hr ago</span></div></div>
+      <div class="notif-item"><div class="notif-dot read"></div><div class="notif-body"><p class="notif-text"><strong>Playlist Swap</strong> meetup is tomorrow — Sat May 24, 6PM on Watch2gether</p><span class="notif-time">3 hr ago</span></div></div>
+      <div class="notif-item"><div class="notif-dot read"></div><div class="notif-body"><p class="notif-text"><strong>Sasha</strong> reacted 🔥 to your message in FPS Crew #42</p><span class="notif-time">5 hr ago</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Sheet ── -->
+<div class="backdrop" id="settingsBackdrop">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Settings</div>
+
+    <div class="settings-slabel">Account</div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="settings-name">Edit Profile</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="settings-name">Privacy</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+
+    <div class="settings-slabel">Preferences</div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><span class="settings-name">Push Notifications</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><span class="settings-name">Sounds</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+
+    <div class="settings-slabel">Other</div>
+    <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg></div><span class="settings-name">Help &amp; Support</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+    <div class="settings-row" style="border-bottom:none" onclick="navigate('v2-02-signin.html')"><div class="settings-row-l"><div class="settings-icon" style="background:oklch(57% 0.22 14/.15)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(57% 0.22 14)" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><span class="settings-name" style="color:oklch(57% 0.22 14)">Sign Out</span></div></div>
+  </div>
+</div>
+
+<!-- ── Member Preview Sheet ── -->
+<div class="backdrop" id="memberBackdrop">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Your group</div>
+    <p class="sheet-sub">3 gamers matched with your vibe</p>
+
+    <div class="member-card">
+      <div class="member-av" style="background: linear-gradient(135deg, oklch(60% 0.20 0), oklch(45% 0.18 0));">J</div>
+      <div class="member-info">
+        <span class="member-name">Jordan</span>
+        <span class="member-bio">FPS chaos goblin. Will revive you and shame you about it.</span>
+        <span class="member-tag">Valorant · Apex · Halo</span>
+      </div>
+    </div>
+
+    <div class="member-card">
+      <div class="member-av" style="background: linear-gradient(135deg, oklch(62% 0.18 60), oklch(48% 0.16 60));">S</div>
+      <div class="member-info">
+        <span class="member-name">Sasha</span>
+        <span class="member-bio">Story-mode purist. Picks lock instead of fighting boss.</span>
+        <span class="member-tag">RPG · BG3 · Disco Elysium</span>
+      </div>
+    </div>
+
+    <div class="member-card">
+      <div class="member-av" style="background: linear-gradient(135deg, oklch(58% 0.20 142), oklch(44% 0.17 142));">K</div>
+      <div class="member-info">
+        <span class="member-name">Kai</span>
+        <span class="member-bio">Cozy game enjoyer who somehow tops the ranked ladder.</span>
+        <span class="member-tag">Stardew · Rocket League</span>
+      </div>
+    </div>
+
+    <button class="btn-sheet-cta" onclick="closeSheet('memberBackdrop'); navigate('06-group-chat.html')">Open group chat</button>
+  </div>
+</div>
+
+<!-- ── Search Overlay ── -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-bar">
+    <div class="search-input-wrap">
+      <svg class="search-icon-pos" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input class="search-input" id="searchInput" type="search" placeholder="Search interests, people…" autocomplete="off">
+    </div>
+    <button class="search-cancel" onclick="closeSearch()">Cancel</button>
+  </div>
+  <div>
+    <div class="search-slabel">Recent</div>
+    <div class="search-chips">
+      <button class="search-chip">Gaming</button>
+      <button class="search-chip">FPS</button>
+      <button class="search-chip">Nationalities</button>
+      <button class="search-chip">Sci-Fi</button>
+    </div>
+  </div>
+  <div>
+    <div class="search-slabel">Trending</div>
+    <div class="search-chips">
+      <button class="search-chip">🎬 Sci-Fi Films</button>
+      <button class="search-chip">⚽ Sports</button>
+      <button class="search-chip">🎵 Indie</button>
+      <button class="search-chip">✈️ Travel</button>
+      <button class="search-chip">🍕 Food</button>
+      <button class="search-chip">💻 Tech</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function navigate(url){
+  document.body.classList.add('nav-out');
+  setTimeout(()=>location.href=url,160);
+}
+document.addEventListener('click',e=>{
+  if(e.defaultPrevented)return;
+  const a=e.target.closest('a[href]');
+  if(!a)return;
+  const h=a.getAttribute('href');
+  if(!h||/^(https?:|mailto:|#)/.test(h))return;
+  e.preventDefault();
+  navigate(h);
+});
+
+// ── Sheet helpers ──
+function openSheet(id){document.getElementById(id).classList.add('open')}
+function closeSheet(id){document.getElementById(id).classList.remove('open')}
+function openSearch(){
+  document.getElementById('searchOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('searchInput').focus(),240);
+}
+function closeSearch(){document.getElementById('searchOverlay').classList.remove('open')}
+
+// Close backdrop when clicking outside sheet
+document.querySelectorAll('.backdrop').forEach(b=>{
+  b.addEventListener('click',e=>{if(e.target===b)b.classList.remove('open')});
+});
+
+// Wire header buttons
+document.querySelector('.logo-btn').addEventListener('click',()=>openSheet('settingsBackdrop'));
+document.querySelector('[aria-label="Search"]').addEventListener('click',openSearch);
+document.querySelector('[aria-label="Notifications, 9 unread"]').addEventListener('click',()=>openSheet('notifBackdrop'));
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeSearch();
+    document.querySelectorAll('.backdrop.open').forEach(b=>b.classList.remove('open'));
+  }
+});
+
+// Wire avatars → member preview sheet
+document.querySelectorAll('.avatar').forEach(av=>{
+  av.addEventListener('click',()=>openSheet('memberBackdrop'));
+});
+
+// AI icebreaker — regenerate question
+const icebreakers = [
+  `"What's the most controversial opinion you have about open-world games?"`,
+  `"Which game would you defend to the death even though it's objectively flawed?"`,
+  `"Worst gaming habit you'd admit to in front of strangers?"`,
+  `"If you could permanently delete one game mechanic from existence, what's it gonna be?"`,
+  `"What's a game you pretend to like just to fit in?"`,
+  `"Most chaotic thing you've done in a co-op game?"`,
+  `"Which boss fight made you genuinely consider quitting gaming?"`
+];
+let ibIdx = 0;
+const regenBtn = document.getElementById('regenBtn');
+const ibQuestion = document.getElementById('ibQuestion');
+regenBtn.addEventListener('click', ()=>{
+  ibIdx = (ibIdx + 1) % icebreakers.length;
+  regenBtn.classList.add('spinning');
+  ibQuestion.style.opacity = '0';
+  setTimeout(()=>{
+    ibQuestion.textContent = icebreakers[ibIdx];
+    ibQuestion.style.transition = 'opacity 0.25s ease-out';
+    ibQuestion.style.opacity = '1';
+  }, 180);
+  setTimeout(()=>regenBtn.classList.remove('spinning'), 700);
+});
+</script>
+</body>
+</html>

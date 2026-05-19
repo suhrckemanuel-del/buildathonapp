@@ -2,175 +2,246 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>InterestMatch — Music Bio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Righteous&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg:      oklch(10% 0.012 268);
-    --surface: oklch(14% 0.012 268);
-    --border:  oklch(22% 0.008 268);
-    --text:    oklch(95% 0.005 268);
-    --muted:   oklch(60% 0.005 268);
-    --accent:  oklch(78% 0.17 95);   /* electric yellow — music */
-  }
-  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: 'Poppins', sans-serif; -webkit-font-smoothing: antialiased; }
-  .screen { min-height: 100dvh; max-width: 430px; margin: 0 auto; padding: 0 24px 40px; display: flex; flex-direction: column; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 4px; }
-  .back-btn {
-    width: 40px; height: 40px; border-radius: 10px; background: var(--surface); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; color: var(--text); transition: background 150ms; touch-action: manipulation;
-  }
-  .back-btn:hover { background: oklch(18% 0.012 268); }
-  .back-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .back-btn svg { width: 20px; height: 20px; }
-  .step-label { font-size: 13px; color: var(--muted); font-weight: 500; }
-  .progress-wrap { padding: 16px 0 0; }
-  .progress-track { height: 4px; border-radius: 99px; background: oklch(20% 0.008 268); }
-  .progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 300ms ease-out; }
-  .cat-badge {
-    display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 10px;
-    border-radius: 99px; background: color-mix(in oklch, var(--accent) 14%, transparent);
-    border: 1px solid color-mix(in oklch, var(--accent) 35%, transparent);
-    color: var(--accent); font-size: 13px; font-weight: 600; margin-top: 24px; width: fit-content;
-  }
-  .cat-badge svg { width: 16px; height: 16px; }
-  .header { padding: 14px 0 28px; }
-  .header h1 { font-family: 'Righteous', sans-serif; font-size: 26px; line-height: 1.25; color: var(--text); }
-  .header p { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
-  .questions { display: flex; flex-direction: column; gap: 24px; flex: 1; }
-  .question-card { display: flex; flex-direction: column; gap: 10px; }
-  .question-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-  .q-number { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); min-width: 28px; padding-top: 1px; }
-  .q-text { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.45; flex: 1; }
-  .skip-btn {
-    font-size: 12px; font-weight: 500; color: var(--muted); background: none; border: none; cursor: pointer;
-    padding: 2px 0; white-space: nowrap; touch-action: manipulation; transition: color 150ms;
-  }
-  .skip-btn:hover { color: var(--text); }
-  .skip-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-  .q-input {
-    width: 100%; min-height: 52px; border-radius: 12px; background: var(--surface); border: 1.5px solid var(--border);
-    color: var(--text); font-family: 'Poppins', sans-serif; font-size: 15px; padding: 14px 16px;
-    resize: none; transition: border-color 150ms; outline: none; line-height: 1.5;
-  }
-  .q-input:focus { border-color: var(--accent); }
-  .q-input::placeholder { color: var(--muted); }
-  .q-input.filled { border-color: color-mix(in oklch, var(--accent) 50%, transparent); }
-  /* Secret genre card */
-  .secret-card {
-    background: var(--surface); border-radius: 14px; border: 1.5px solid var(--border); padding: 16px;
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .secret-label { font-size: 12px; color: var(--muted); font-weight: 500; }
-  .secret-genres { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip {
-    padding: 7px 14px; border-radius: 99px; font-size: 13px; font-weight: 500;
-    background: oklch(18% 0.008 268); border: 1.5px solid var(--border); color: var(--muted);
-    cursor: pointer; transition: border-color 150ms, color 150ms, background 150ms; touch-action: manipulation;
-  }
-  .chip:hover, .chip.selected {
-    border-color: var(--accent); color: color-mix(in oklch, var(--accent) 80%, oklch(10% 0.012 268));
-    background: color-mix(in oklch, var(--accent) 12%, transparent);
-  }
-  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .cta-area { padding-top: 32px; display: flex; flex-direction: column; gap: 12px; }
-  .btn-primary {
-    width: 100%; height: 56px; border-radius: 14px; background: var(--accent); border: none;
-    color: oklch(12% 0.012 268); font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 700;
-    cursor: pointer; transition: transform 120ms ease-out, opacity 120ms ease-out; touch-action: manipulation;
-  }
-  .btn-primary:active { transform: scale(0.97); opacity: 0.88; }
-  .btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-  .hint { font-size: 12px; color: var(--muted); text-align: center; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      oklch(9% 0.010 268);
+  --surface: oklch(13% 0.010 268);
+  --border:  oklch(20% 0.008 268);
+  --text:    oklch(96% 0.005 268);
+  --muted:   oklch(55% 0.005 268);
+  --accent:  oklch(62% 0.21 302);
+  --violet:  oklch(62% 0.21 302);
+}
+html, body { height: 100%; -webkit-font-smoothing: antialiased; }
+body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; max-width: 430px; min-height: 100dvh; margin: 0 auto; display: flex; flex-direction: column; overflow-x: hidden; position: relative; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 52px 20px 12px; position: sticky; top: 0; z-index: 20; background: var(--bg); }
+.logo-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--text); border: none; display: flex; align-items: center; justify-content: center; touch-action: manipulation; cursor: pointer; flex-shrink: 0; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.icon-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: none; display: flex; align-items: center; justify-content: center; color: var(--text); cursor: pointer; touch-action: manipulation; position: relative; }
+.badge { position: absolute; top: 4px; right: 3px; min-width: 18px; height: 18px; padding: 0 4px; background: var(--violet); border-radius: 100px; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg); font-family: 'Plus Jakarta Sans', sans-serif; }
+.step-row { padding: 4px 20px 14px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
+.back-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; color: var(--text); transition: background 0.15s, border-color 0.15s; }
+.back-btn:active { background: oklch(18% 0.012 268); border-color: var(--muted); }
+.step-label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.progress-wrap { padding: 0 20px 14px; position: relative; z-index: 1; }
+.progress-track { height: 6px; border-radius: 99px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 99px; background: var(--accent); width: 50%; transition: width 0.35s ease-out; }
+.content { flex: 1; padding: 6px 20px 40px; display: flex; flex-direction: column; gap: 22px; position: relative; z-index: 1; }
+.cat-badge { display: inline-flex; align-items: center; gap: 8px; background: color-mix(in oklch, var(--accent) 14%, transparent); border: 1.5px solid color-mix(in oklch, var(--accent) 40%, transparent); border-radius: 100px; padding: 7px 16px; font-size: 13px; font-weight: 700; color: var(--text); align-self: flex-start; }
+.title { font-family: 'Righteous', sans-serif; font-size: 32px; line-height: 1.05; letter-spacing: -0.01em; }
+.subtitle { font-size: 14px; font-weight: 500; color: var(--muted); margin-top: 8px; max-width: 320px; }
+.q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.18s, opacity 0.18s; }
+.q-card.skipped-card { opacity: 0.55; }
+.q-card:focus-within { border-color: color-mix(in oklch, var(--accent) 50%, var(--border)); }
+.q-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.q-meta { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.q-num { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.q-text { font-size: 15.5px; font-weight: 600; line-height: 1.35; color: var(--text); }
+.skip-btn { padding: 6px 14px; border-radius: 100px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; touch-action: manipulation; white-space: nowrap; transition: color 0.15s, border-color 0.15s, background 0.15s; flex-shrink: 0; }
+.skip-btn:active { background: var(--border); color: var(--text); }
+.skip-btn.unskip { border-color: color-mix(in oklch, var(--accent) 60%, transparent); color: var(--accent); }
+.q-input { width: 100%; background: oklch(11% 0.010 268); border: 1.5px solid var(--border); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14.5px; font-weight: 500; padding: 14px 16px; border-radius: 16px; outline: none; resize: none; line-height: 1.45; transition: border-color 0.15s, background 0.15s; }
+.q-input::placeholder { color: var(--muted); }
+.q-input:focus { border-color: var(--accent); background: oklch(13% 0.010 268); }
+.q-input.skipped { opacity: 0.4; pointer-events: none; }
+.q-input.filled { border-color: color-mix(in oklch, var(--accent) 50%, transparent); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 9px 16px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--surface); color: var(--muted); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; touch-action: manipulation; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+.chip:active { transform: scale(0.97); }
+.chip.selected { border-color: var(--accent); color: var(--accent); background: color-mix(in oklch, var(--accent) 15%, transparent); }
+.chips.skipped { opacity: 0.4; pointer-events: none; }
+.cta-area { padding: 8px 20px 32px; display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1; }
+.btn-primary { width: 100%; padding: 17px 0; border-radius: 100px; border: none; background: var(--accent); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 800; color: oklch(98% 0.005 268); cursor: pointer; touch-action: manipulation; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.12s ease-out, opacity 0.15s; letter-spacing: 0.01em; }
+.btn-primary:active { transform: scale(0.985); opacity: 0.92; }
+.hint { text-align: center; font-size: 12px; color: var(--muted); }
+.backdrop{position:fixed;inset:0;background:oklch(0% 0 0/.58);z-index:50;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.backdrop.open{opacity:1;pointer-events:all}
+.sheet{width:100%;max-width:430px;margin:0 auto;background:var(--surface);border-radius:24px 24px 0 0;padding:12px 20px 48px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:88dvh;overflow-y:auto}
+.backdrop.open .sheet{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 20px}
+.sheet-title{font-family:'Righteous',cursive;font-size:20px;color:var(--text);margin-bottom:4px}
+.notif-list{display:flex;flex-direction:column}
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--violet);flex-shrink:0;margin-top:5px}
+.notif-dot.read{background:transparent;border:1.5px solid var(--border)}
+.notif-body{flex:1}
+.notif-text{font-size:13.5px;color:var(--text);line-height:1.5}
+.notif-text strong{font-weight:700}
+.notif-time{font-size:11px;color:var(--muted);margin-top:2px;display:block}
+.settings-slabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;padding-top:12px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;touch-action:manipulation}
+.settings-row-l{display:flex;align-items:center;gap:12px}
+.settings-icon{width:34px;height:34px;border-radius:10px;background:var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.settings-name{font-size:15px;color:var(--text);font-weight:500}
+.s-arrow{color:var(--muted)}
+.toggle{width:44px;height:26px;border-radius:99px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .2s;touch-action:manipulation;flex-shrink:0}
+.toggle.on{background:var(--violet)}
+.toggle::after{content:'';width:20px;height:20px;border-radius:50%;background:white;position:absolute;top:3px;left:3px;transition:transform .2s}
+.toggle.on::after{transform:translateX(18px)}
+.search-overlay{position:fixed;inset:0;background:var(--bg);z-index:60;padding:52px 20px 20px;display:flex;flex-direction:column;gap:20px;opacity:0;transform:translateY(-12px);transition:opacity .22s ease,transform .22s ease;pointer-events:none;max-width:430px;margin:0 auto}
+.search-overlay.open{opacity:1;transform:translateY(0);pointer-events:all}
+.search-bar{display:flex;align-items:center;gap:12px}
+.search-input-wrap{flex:1;position:relative}
+.search-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:13px 20px 13px 44px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .15s;-webkit-appearance:none}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--muted)}
+.search-icon-pos{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search-cancel{font-size:14px;font-weight:700;color:var(--accent);background:none;border:none;cursor:pointer;touch-action:manipulation;white-space:nowrap;padding:0}
+.search-slabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.search-chips{display:flex;flex-wrap:wrap;gap:8px}
+.search-chip{padding:8px 16px;border-radius:100px;border:1.5px solid var(--border);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;touch-action:manipulation}
+@keyframes _pi{from{opacity:0}to{opacity:1}}
+@keyframes _po{from{opacity:1}to{opacity:0}}
+body{animation:_pi .22s ease-out}
+body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}body.nav-out{opacity:0}}
 </style>
 </head>
 <body>
-<main class="screen" role="main">
-  <div class="topbar">
-    <a href="03-select-interest.html" aria-label="Back to categories">
-      <button class="back-btn" tabindex="-1" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-    </a>
-    <span class="step-label">Step 1 of 2</span>
-  </div>
 
-  <div class="progress-wrap" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion 50%">
-    <div class="progress-track"><div class="progress-fill" style="width: 50%"></div></div>
+<header class="header">
+  <button class="logo-btn" aria-label="Menu">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="3" fill="#0a0a12"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#0a0a12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="header-right">
+    <button class="icon-btn" aria-label="Search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Notifications, 9 unread">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      <span class="badge">9</span>
+    </button>
   </div>
+</header>
 
-  <div class="cat-badge" aria-hidden="true">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+<div class="step-row">
+  <button class="back-btn" aria-label="Go back to categories" onclick="navigate('v2-03-categories.html')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <span class="step-label">Step 1 of 2</span>
+</div>
+
+<div class="progress-wrap" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div></div>
+
+<main class="content">
+
+  <span class="cat-badge">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(62% 0.21 302)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
     Music
+  </span>
+
+  <div>
+    <h1 class="title">Your music bio</h1>
+    <p class="subtitle">Be honest — especially about the guilty pleasures.</p>
   </div>
 
-  <div class="header">
-    <h1>Your music bio</h1>
-    <p>Be honest — especially about the guilty pleasures.</p>
-  </div>
+  <article class="q-card">
+    <div class="q-top"><div class="q-meta"><span class="q-num">Question 01</span><span class="q-text">What's your favourite song right now?</span></div><button class="skip-btn" aria-label="Skip question 1">Skip</button></div>
+    <textarea class="q-input filled" rows="2" placeholder="Song — Artist" aria-label="Your favourite song right now">BIRDS OF A FEATHER — Billie Eilish</textarea>
+  </article>
 
-  <div class="questions">
+  <article class="q-card">
+    <div class="q-top"><div class="q-meta"><span class="q-num">Question 02</span><span class="q-text">Your favourite 3 artists?</span></div><button class="skip-btn" aria-label="Skip question 2">Skip</button></div>
+    <textarea class="q-input" rows="2" placeholder="e.g. Frank Ocean, Tyler the Creator, Lorde…" aria-label="Your favourite 3 artists"></textarea>
+  </article>
 
-    <div class="question-card">
-      <div class="question-top">
-        <span class="q-number">01</span>
-        <span class="q-text">What's your favourite song right now?</span>
-        <button class="skip-btn" aria-label="Skip question 1">Skip</button>
-      </div>
-      <textarea class="q-input filled" rows="2" placeholder="Song — Artist" aria-label="Your favourite song right now">BIRDS OF A FEATHER — Billie Eilish</textarea>
+  <article class="q-card">
+    <div class="q-top"><div class="q-meta"><span class="q-num">Question 03</span><span class="q-text">A genre you secretly love that people wouldn't guess?</span></div><button class="skip-btn" aria-label="Skip question 3">Skip</button></div>
+    <div class="chips" role="group" aria-label="Secret genre options">
+      <button class="chip" aria-pressed="false">Country</button>
+      <button class="chip selected" aria-pressed="true">Musical Theatre</button>
+      <button class="chip" aria-pressed="false">Classical</button>
+      <button class="chip" aria-pressed="false">Metal</button>
+      <button class="chip" aria-pressed="false">K-Pop</button>
+      <button class="chip" aria-pressed="false">Reggaeton</button>
+      <button class="chip" aria-pressed="false">Drum &amp; Bass</button>
+      <button class="chip" aria-pressed="false">Folk</button>
     </div>
+    <textarea class="q-input" rows="1" placeholder="Or describe it…" aria-label="Other secret genre"></textarea>
+  </article>
 
-    <div class="question-card">
-      <div class="question-top">
-        <span class="q-number">02</span>
-        <span class="q-text">Your favourite 3 artists?</span>
-        <button class="skip-btn" aria-label="Skip question 2">Skip</button>
-      </div>
-      <textarea class="q-input" rows="2" placeholder="e.g. Frank Ocean, Tyler the Creator, Lorde…" aria-label="Your favourite 3 artists"></textarea>
-    </div>
-
-    <div class="question-card">
-      <div class="question-top">
-        <span class="q-number">03</span>
-        <span class="q-text">A genre you secretly love that people wouldn't guess from you?</span>
-        <button class="skip-btn" aria-label="Skip question 3">Skip</button>
-      </div>
-      <div class="secret-card">
-        <p class="secret-label">Pick one (or type your own below)</p>
-        <div class="secret-genres" role="group" aria-label="Secret genre options">
-          <button class="chip" aria-pressed="false">Country</button>
-          <button class="chip selected" aria-pressed="true">Musical Theatre</button>
-          <button class="chip" aria-pressed="false">Classical</button>
-          <button class="chip" aria-pressed="false">Metal</button>
-          <button class="chip" aria-pressed="false">K-Pop</button>
-          <button class="chip" aria-pressed="false">Reggaeton</button>
-          <button class="chip" aria-pressed="false">Drum &amp; Bass</button>
-          <button class="chip" aria-pressed="false">Folk</button>
-        </div>
-        <textarea class="q-input" rows="1" style="margin-top:8px" placeholder="Or describe it…" aria-label="Other secret genre"></textarea>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="cta-area">
-    <a href="05-matching.html" style="text-decoration:none; display:block;">
-      <button class="btn-primary">Find my music people</button>
-    </a>
-    <p class="hint">Your answers are only shared with your matched group</p>
-  </div>
 </main>
+
+<div class="cta-area">
+  <button class="btn-primary" onclick="navigate('v2-05-matching.html')">
+    Find my music people
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+  </button>
+  <p class="hint">Your answers are only shared with your matched group</p>
+</div>
+
+<div class="backdrop" id="notifBackdrop"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">Notifications</div><div class="notif-list">
+  <div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><p class="notif-text"><strong>Playlist Swap</strong> meetup is Sunday 7PM on Spotify</p><span class="notif-time">Just now</span></div></div>
+  <div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><p class="notif-text">3 people near you joined a <strong>K-Pop</strong> group this week</p><span class="notif-time">2 hr ago</span></div></div>
+  <div class="notif-item"><div class="notif-dot read"></div><div class="notif-body"><p class="notif-text">Your bio is almost ready — finish to get matched faster</p><span class="notif-time">1 day ago</span></div></div>
+</div></div></div>
+
+<div class="backdrop" id="settingsBackdrop"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">Settings</div>
+  <div class="settings-slabel">Account</div>
+  <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="settings-name">Edit Profile</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+  <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="settings-name">Privacy</span></div><svg class="s-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+  <div class="settings-slabel">Preferences</div>
+  <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><span class="settings-name">Push Notifications</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+  <div class="settings-row"><div class="settings-row-l"><div class="settings-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><span class="settings-name">Sounds</span></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+  <div class="settings-row" style="border-bottom:none" onclick="navigate('v2-02-signin.html')"><div class="settings-row-l"><div class="settings-icon" style="background:oklch(57% 0.22 14/.15)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(57% 0.22 14)" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><span class="settings-name" style="color:oklch(57% 0.22 14)">Sign Out</span></div></div>
+</div></div>
+
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-bar"><div class="search-input-wrap"><svg class="search-icon-pos" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="search-input" id="searchInput" type="search" placeholder="Search songs, artists, genres…" autocomplete="off"></div><button class="search-cancel" onclick="closeSearch()">Cancel</button></div>
+  <div><div class="search-slabel">Recent</div><div class="search-chips"><button class="search-chip">Frank Ocean</button><button class="search-chip">K-Pop</button><button class="search-chip">Indie</button></div></div>
+  <div><div class="search-slabel">Trending</div><div class="search-chips"><button class="search-chip">🎵 Afrobeats</button><button class="search-chip">🎤 R&amp;B</button><button class="search-chip">🥁 Drum &amp; Bass</button><button class="search-chip">🎻 Classical</button></div></div>
+</div>
+
 <script>
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const pressed = chip.getAttribute('aria-pressed') === 'true';
-      chip.setAttribute('aria-pressed', String(!pressed));
-      chip.classList.toggle('selected', !pressed);
-    });
+function navigate(url){document.body.classList.add('nav-out');setTimeout(()=>location.href=url,160);}
+document.addEventListener('click',e=>{if(e.defaultPrevented)return;const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||/^(https?:|mailto:|#)/.test(h))return;e.preventDefault();navigate(h);});
+function openSheet(id){document.getElementById(id).classList.add('open')}
+function closeSheet(id){document.getElementById(id).classList.remove('open')}
+function openSearch(){document.getElementById('searchOverlay').classList.add('open');setTimeout(()=>document.getElementById('searchInput').focus(),240);}
+function closeSearch(){document.getElementById('searchOverlay').classList.remove('open')}
+document.querySelectorAll('.backdrop').forEach(b=>{b.addEventListener('click',e=>{if(e.target===b)b.classList.remove('open')});});
+document.querySelector('.logo-btn').addEventListener('click',()=>openSheet('settingsBackdrop'));
+document.querySelector('[aria-label="Search"]').addEventListener('click',openSearch);
+document.querySelector('[aria-label="Notifications, 9 unread"]').addEventListener('click',()=>openSheet('notifBackdrop'));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSearch();document.querySelectorAll('.backdrop.open').forEach(b=>b.classList.remove('open'));}});
+document.querySelectorAll('.chip').forEach(chip => {chip.addEventListener('click', () => {if (chip.parentElement.classList.contains('skipped')) return;const pressed = chip.getAttribute('aria-pressed') === 'true';chip.setAttribute('aria-pressed', String(!pressed));chip.classList.toggle('selected', !pressed);});});
+document.querySelectorAll('.skip-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.q-card');
+    const inputs = card.querySelectorAll('.q-input');
+    const chips = card.querySelector('.chips');
+    const isSkipped = card.classList.toggle('skipped-card');
+    inputs.forEach(i => { i.classList.toggle('skipped', isSkipped); i.disabled = isSkipped; });
+    if (chips) chips.classList.toggle('skipped', isSkipped);
+    btn.classList.toggle('unskip', isSkipped);
+    btn.textContent = isSkipped ? 'Unskip' : 'Skip';
+    updateProgress();
   });
+});
+const progressEl = document.getElementById('progressFill');
+function updateProgress(){
+  const cards = document.querySelectorAll('.q-card');
+  let filled = 0;
+  cards.forEach(c => {
+    if (c.classList.contains('skipped-card')) { filled++; return; }
+    const inp = c.querySelector('.q-input');
+    const chs = c.querySelector('.chips');
+    if (inp && inp.value.trim()) filled++;
+    else if (chs && chs.querySelector('.chip.selected')) filled++;
+  });
+  progressEl.style.width = (50 + Math.round((filled / cards.length) * 50)) + '%';
+}
+document.querySelectorAll('.q-input').forEach(i => i.addEventListener('input', updateProgress));
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => setTimeout(updateProgress, 0)));
+updateProgress();
 </script>
 </body>
 </html>

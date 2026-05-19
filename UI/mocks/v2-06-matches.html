@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>InterestMatch — Your Groups</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      oklch(9% 0.010 268);
+  --surface: oklch(13% 0.010 268);
+  --border:  oklch(20% 0.008 268);
+  --text:    oklch(96% 0.005 268);
+  --muted:   oklch(55% 0.005 268);
+  --accent:  oklch(62% 0.21 302);
+}
+
+html, body { height: 100%; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 52px 20px 16px;
+  position: sticky; top: 0; z-index: 20;
+  background: var(--bg);
+}
+.logo-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--text); border: none;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation; cursor: pointer; flex-shrink: 0;
+}
+.header-right { display: flex; align-items: center; gap: 10px; }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: none; background: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); cursor: pointer; touch-action: manipulation;
+  position: relative;
+}
+.badge {
+  position: absolute; top: 4px; right: 3px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  background: var(--accent); border-radius: 100px;
+  font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Feed ── */
+.feed {
+  flex: 1;
+  padding: 0 16px 112px;
+  display: flex; flex-direction: column; gap: 0;
+}
+
+/* ── Page heading ── */
+.page-head {
+  padding: 4px 4px 16px;
+  display: flex; align-items: baseline; justify-content: space-between;
+}
+.page-title {
+  font-size: 30px; font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.page-count {
+  font-size: 13px; color: var(--muted); font-weight: 600;
+}
+
+/* ── Chat rows ── */
+.chat-list { display: flex; flex-direction: column; }
+
+.chat-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  cursor: pointer; touch-action: manipulation;
+  position: relative;
+}
+.chat-row:last-child { border-bottom: none; }
+
+.chat-avatar {
+  width: 52px; height: 52px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.chat-avatar.gaming  { background: linear-gradient(135deg, oklch(18% 0.16 252), oklch(36% 0.22 252)); }
+.chat-avatar.films   { background: linear-gradient(135deg, oklch(18% 0.14 14),  oklch(36% 0.22 14)); }
+.chat-avatar.music   { background: linear-gradient(135deg, oklch(24% 0.12 95),  oklch(44% 0.17 95)); }
+.chat-avatar.sports  { background: linear-gradient(135deg, oklch(18% 0.13 142), oklch(36% 0.20 142)); }
+.chat-avatar.nations { background: linear-gradient(135deg, oklch(22% 0.17 302), oklch(42% 0.22 302)); }
+
+.chat-body { flex: 1; min-width: 0; }
+.chat-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px;
+}
+.chat-name {
+  font-family: 'Righteous', cursive;
+  font-size: 16px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chat-time { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+.chat-bottom {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.chat-preview {
+  font-size: 13px; color: var(--muted); font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  flex: 1;
+}
+.chat-preview strong { color: oklch(75% 0.005 268); font-weight: 600; }
+.chat-unread {
+  min-width: 20px; height: 20px; padding: 0 5px;
+  border-radius: 100px;
+  background: var(--accent);
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Find more CTA ── */
+.find-more-wrap { padding: 24px 0 0; }
+.btn-find-more {
+  width: 100%; padding: 16px 0;
+  border-radius: 100px;
+  border: 1.5px solid var(--border);
+  background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: var(--text);
+  cursor: pointer; touch-action: manipulation;
+  transition: border-color 0.15s, background 0.15s;
+}
+.btn-find-more:active { background: var(--surface); }
+
+/* ── Empty state ── */
+.empty {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; text-align: center; padding: 60px 20px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 48px; }
+.empty-title { font-family: 'Righteous', cursive; font-size: 20px; color: var(--text); }
+.empty-sub { font-size: 14px; line-height: 1.5; }
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  position: fixed; bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  padding: 10px 18px 32px;
+  background: linear-gradient(to top, var(--bg) 65%, transparent);
+  display: flex; align-items: center; gap: 12px;
+  z-index: 20;
+}
+.fab {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--text); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; touch-action: manipulation;
+  box-shadow: 0 4px 16px oklch(96% 0.005 268 / 0.2);
+}
+.nav-pill-wrap {
+  flex: 1; background: var(--surface);
+  border-radius: 100px; padding: 5px;
+  display: flex; gap: 4px;
+}
+.nav-pill {
+  flex: 1; padding: 9px 0; border-radius: 100px;
+  border: none; background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px; font-weight: 700;
+  color: var(--muted); cursor: pointer; touch-action: manipulation;
+  transition: color 0.15s ease-out;
+}
+.nav-pill.active { background: var(--accent); color: oklch(96% 0.005 268); }
+
+@keyframes _pi{from{opacity:0}to{opacity:1}}
+@keyframes _po{from{opacity:1}to{opacity:0}}
+body{animation:_pi .22s ease-out}
+body.nav-out{animation:_po .16s ease-in forwards;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}body.nav-out{opacity:0}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <button class="logo-btn" aria-label="Menu">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="3" fill="#0a0a12"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#0a0a12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="header-right">
+    <button class="icon-btn" aria-label="Search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Notifications, 9 unread">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+      </svg>
+      <span class="badge">9</span>
+    </button>
+  </div>
+</header>
+
+<main class="feed">
+  <div class="page-head">
+    <h1 class="page-title">Your Groups</h1>
+    <span class="page-count">3 active</span>
+  </div>
+
+  <div class="chat-list">
+
+    <!-- FPS Crew #42 — Gaming -->
+    <a href="06-group-chat.html" class="chat-row">
+      <div class="chat-avatar gaming">🎮</div>
+      <div class="chat-body">
+        <div class="chat-top">
+          <span class="chat-name">FPS Crew #42</span>
+          <span class="chat-time">2m</span>
+        </div>
+        <div class="chat-bottom">
+          <span class="chat-preview"><strong>Jordan:</strong> I mash buttons and somehow lose to CPU on easy 💀</span>
+          <span class="chat-unread">3</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- Sci-Fi Watch Club — Films -->
+    <a href="06-group-chat.html" class="chat-row">
+      <div class="chat-avatar films">🎬</div>
+      <div class="chat-body">
+        <div class="chat-top">
+          <span class="chat-name">Sci-Fi Watch Club</span>
+          <span class="chat-time">1h</span>
+        </div>
+        <div class="chat-bottom">
+          <span class="chat-preview"><strong>Sasha:</strong> Anyone watched Dune Part 2 yet? No spoilers please</span>
+          <span class="chat-unread">1</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- Playlist Swap — Music -->
+    <a href="06-group-chat.html" class="chat-row">
+      <div class="chat-avatar music">🎵</div>
+      <div class="chat-body">
+        <div class="chat-top">
+          <span class="chat-name">Playlist Swap</span>
+          <span class="chat-time">3h</span>
+        </div>
+        <div class="chat-bottom">
+          <span class="chat-preview"><strong>Alex:</strong> This playlist is absolutely fire 🔥🔥</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="find-more-wrap">
+    <button class="btn-find-more" onclick="navigate('v2-03-categories.html')">+ Find more groups</button>
+  </div>
+</main>
+
+<nav class="bottom-nav" aria-label="Main navigation">
+  <button class="fab" aria-label="Create">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(9% 0.01 268)" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <div class="nav-pill-wrap" role="tablist">
+    <button class="nav-pill" role="tab" aria-selected="false" onclick="navigate('v2-01-splash.html')">Interests</button>
+    <button class="nav-pill" role="tab" aria-selected="false" onclick="navigate('v2-04-events.html')">Events</button>
+    <button class="nav-pill active" role="tab" aria-selected="true">Matches</button>
+  </div>
+</nav>
+
+<script>
+function navigate(url){
+  document.body.classList.add('nav-out');
+  setTimeout(()=>location.href=url,160);
+}
+document.addEventListener('click',e=>{
+  if(e.defaultPrevented)return;
+  const a=e.target.closest('a[href]');
+  if(!a)return;
+  const h=a.getAttribute('href');
+  if(!h||/^(https?:|mailto:|#)/.test(h))return;
+  e.preventDefault();
+  navigate(h);
+});
+</script>
+</body>
+</html>
