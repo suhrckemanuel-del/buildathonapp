@@ -36,7 +36,7 @@ async function post<TReq, TRes>(path: string, body: TReq): Promise<TRes> {
 
 // Note: create-group is intentionally absent from this surface. It is invoked
 // server-side by match-users; exposing it to the client would let any user
-// force arbitrary user_ids into a group. See SECURITY_AUDIT.md F3.
+// force arbitrary user_ids into a group.
 export const api = {
   matchUsers: (body: MatchUsersRequest) =>
     post<MatchUsersRequest, MatchUsersResponse>('match-users', body),

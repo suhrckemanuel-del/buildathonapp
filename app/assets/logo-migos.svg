@@ -1,0 +1,18 @@
+<svg width="100%" viewBox="0 0 1034 1034" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Migos iOS app icon</title>
+  <desc>Orange rounded bold migos wordmark on black, iOS app icon dimensions</desc>
+
+  <defs>
+    <linearGradient id="og" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffaa33"/>
+      <stop offset="100%" stop-color="#ff6600"/>
+    </linearGradient>
+    <clipPath id="ios-clip">
+      <rect x="0" y="0" width="1024" height="1024" rx="225"/>
+    </clipPath>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="1024" fill="#000000" rx="225" clip-path="url(#ios-clip)"/>
+
+  <text x="512" y="610" text-anchor="middle" font-family="'Varela Round', 'Nunito', 'Trebuchet MS', Arial, sans-serif" font-size="220" font-weight="900" letter-spacing="-6" fill="url(#og)">migos</text>
+</svg>

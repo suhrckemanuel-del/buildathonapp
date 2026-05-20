@@ -8,7 +8,7 @@
 //
 // Fail-open: if the RPC errors (DB down, migration missing), we log and allow
 // the request. The alternative — failing closed — would make a DB hiccup take
-// the whole app down. For a buildathon demo this trade-off is correct.
+// the whole app down. For this app's traffic profile the trade-off is correct.
 
 import type { HttpResponseInit } from '@azure/functions';
 import { createClient } from '@supabase/supabase-js';

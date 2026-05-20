@@ -225,7 +225,7 @@ async function ensureAuthUser(seed: SeedUser): Promise<string> {
     email: seed.email,
     password: demoPassword,
     email_confirm: true,
-    user_metadata: { username: seed.username, seeded_for: 'buildathon-judge-demo' },
+    user_metadata: { username: seed.username, seeded_for: 'migos-demo' },
   });
 
   if (error) throw error;
@@ -322,7 +322,7 @@ async function main(): Promise<void> {
     console.log(`Seeded ${seed.username} (${seed.email})`);
   }
 
-  console.log('\nBuildathon judge seed complete');
+  console.log('\nMigos demo seed complete');
   console.log(`Users: ${seedUsers.length}`);
   console.log(`Profiles: ${profileCount}`);
   console.log(`Embeddings generated: ${embeddingCount}`);

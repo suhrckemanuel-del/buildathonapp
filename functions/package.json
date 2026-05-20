@@ -1,7 +1,7 @@
 {
-  "name": "buildathon-functions",
+  "name": "migos-functions",
   "version": "1.0.0",
-  "description": "Azure Functions backend for Buildathon app",
+  "description": "Azure Functions backend for the Migos app",
   "main": "dist/functions/index.js",
   "scripts": {
     "build": "tsc",

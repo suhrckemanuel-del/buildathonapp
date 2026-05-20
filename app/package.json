@@ -1,6 +1,7 @@
 {
   "name": "migos",
   "version": "1.0.0",
+  "description": "Migos — AI-matched small group chats around films, gaming, sports, and music. Expo + Supabase frontend.",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
