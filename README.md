@@ -1,8 +1,10 @@
-# Buildathon App
+# Migos Buildathon App 
 
 AI-powered social matching app. Users fill in interest profiles, AI matches them into groups of 4–6, and sends the first message.
 
 ---
+
+
 
 ## Repo Structure
 
